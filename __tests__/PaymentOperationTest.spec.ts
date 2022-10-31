@@ -18,7 +18,7 @@ describe("Deposit Operation", () => {
       const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeDeposit(5, 'MTN', '677550203', new Date(), nonce);
+      await payment.makeDeposit(5, 'MTN', '677550203', new Date(), nonce, 1);
     } catch (e: any) {
       expect(e.name).toEqual('ServiceNotFoundError');
     }
@@ -29,7 +29,7 @@ describe("Deposit Operation", () => {
       const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeDeposit(5, 'MTN', '677550203', new Date(), nonce);
+      await payment.makeDeposit(5, 'MTN', '677550203', new Date(), nonce, 1);
     } catch (e: any) {
       expect(e.name).toEqual('PermissionDeniedError');
     }
@@ -40,14 +40,14 @@ describe("Deposit Operation", () => {
       const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeDeposit(5, 'MTN', '677550203', new Date(), nonce);
+      await payment.makeDeposit(5, 'MTN', '677550203', new Date(), nonce, 1);
     } catch (e: any) {
       expect(e.name).toEqual('InvalidClientRequestError');
     }
   });
   it('Should make deposit test with success', async () => {
     const payment = new PaymentOperation({applicationKey: applicationKey, accessKey, secretKey});
-    const response = await payment.makeDeposit(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+    const response = await payment.makeDeposit(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator(), 1);
     expect(response.isOperationSuccess()).toBeTruthy();
     expect(response.isTransactionSuccess()).toBeTruthy();
   });
@@ -63,7 +63,7 @@ describe("Collect Operation", () => {
       const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeCollect(5, 'MTN', '677550203', new Date(), nonce);
+      await payment.makeCollect(5, 'MTN', '677550203', new Date(), nonce, null);
     } catch (e: any) {
       expect(e.name).toEqual('ServiceNotFoundError');
     }
@@ -74,7 +74,7 @@ describe("Collect Operation", () => {
       const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeCollect(5, 'MTN', '677550203', new Date(), nonce);
+      await payment.makeCollect(5, 'MTN', '677550203', new Date(), nonce, null);
     } catch (e: any) {
       expect(e.name).toEqual('PermissionDeniedError');
     }
@@ -85,20 +85,20 @@ describe("Collect Operation", () => {
       const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeCollect(5, 'MTN', '677550203', new Date(), nonce);
+      await payment.makeCollect(5, 'MTN', '677550203', new Date(), nonce, null);
     } catch (e: any) {
       expect(e.name).toEqual('InvalidClientRequestError');
     }
   });
   it('Should make payment test with success', async () => {
     const payment = new PaymentOperation({applicationKey: applicationKey, accessKey, secretKey});
-    const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+    const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator(), '1');
     expect(response.isOperationSuccess()).toBeTruthy();
     expect(response.isTransactionSuccess()).toBeTruthy();
   });
   it('Should make payment test with pending', async () => {
     const payment = new PaymentOperation({applicationKey: applicationKey, accessKey, secretKey});
-    const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator(), 'CM', 'XAF', true, 'asynchronous');
+    const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator(), 1, 'CM', 'XAF', true, 'asynchronous', false);
     expect(response.isOperationSuccess()).toBeTruthy();
     expect(response.isTransactionSuccess()).toBeFalsy();
   });

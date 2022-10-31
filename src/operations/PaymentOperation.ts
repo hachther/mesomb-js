@@ -93,6 +93,7 @@ export class PaymentOperation {
    * @param payer account number to collect from
    * @param date date of the request
    * @param nonce unique string on each request
+   * @param trxID ID of the transaction in your system
    * @param country country CM, NE
    * @param currency code of the currency of the amount
    * @param feesIncluded if your want MeSomb to include and compute fees in the amount to collect
@@ -111,6 +112,7 @@ export class PaymentOperation {
     payer: string,
     date: Date,
     nonce: string,
+    trxID: string | number | null,
     country: string = 'CM',
     currency: string = 'XAF',
     feesIncluded: boolean = true,
@@ -155,17 +157,22 @@ export class PaymentOperation {
       body,
     );
 
+    const headers: Record<string, string> = {
+      'x-mesomb-date': String(date.getTime()),
+      'x-mesomb-nonce': nonce,
+      Authorization: authorization,
+      'Content-Type': 'application/json',
+      'X-MeSomb-Application': this.applicationKey,
+      'X-MeSomb-OperationMode': mode,
+    };
+    if (trxID) {
+      headers['X-MeSomb-TrxID'] = String(trxID);
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: {
-        'x-mesomb-date': String(date.getTime()),
-        'x-mesomb-nonce': nonce,
-        Authorization: authorization,
-        'Content-Type': 'application/json',
-        'X-MeSomb-Application': this.applicationKey,
-        'X-MeSomb-OperationMode': mode,
-      },
+      headers,
     });
     if (response.status >= 400) {
       await this.processClientException(response);
@@ -183,6 +190,7 @@ export class PaymentOperation {
    * @param receiver receiver account (in the local phone number)
    * @param date date of the request
    * @param nonce Unique key generated for each transaction
+   * @param trxID ID of the transaction in your system
    * @param country country code 'CM' by default
    * @param currency currency of the transaction (XAF, XOF, ...) XAF by default
    * @param extra Extra parameters to send in the body check the API documentation
@@ -195,6 +203,7 @@ export class PaymentOperation {
     receiver: string,
     date: Date,
     nonce: string,
+    trxID: string | number | null,
     country: string = 'CM',
     currency: string = 'XAF',
     extra: Record<string, any> | undefined = undefined,
@@ -216,16 +225,21 @@ export class PaymentOperation {
       body,
     );
 
+    const headers: Record<string, string> = {
+      'x-mesomb-date': String(date.getTime()),
+      'x-mesomb-nonce': nonce,
+      Authorization: authorization,
+      'Content-Type': 'application/json',
+      'X-MeSomb-Application': this.applicationKey,
+    }
+    if (trxID) {
+      headers['X-MeSomb-TrxID'] = String(trxID);
+    }
+
     const response = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: {
-        'x-mesomb-date': String(date.getTime()),
-        'x-mesomb-nonce': nonce,
-        Authorization: authorization,
-        'Content-Type': 'application/json',
-        'X-MeSomb-Application': this.applicationKey,
-      },
+      headers,
     });
     if (response.status >= 400) {
       await this.processClientException(response);
