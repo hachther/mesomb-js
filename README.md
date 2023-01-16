@@ -12,7 +12,7 @@
   </a>
 </p>
 
-> JavaScript client for MeSomb services.
+> JavaScript client for mobile payment (Orange Money, Mobile Money ...) with MeSomb services.
 > 
 > You can check the full [documentation of the api here](https://mesomb.hachther.com/en/api/v1.1/schema/)
 

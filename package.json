@@ -1,10 +1,11 @@
 {
   "name": "@hachther/mesomb",
-  "version": "1.0.0",
-  "description": "JS client to perform operation with MeSomb",
+  "version": "1.0.2",
+  "description": "JS client to perform mobile payment operation with MeSomb",
   "main": "lib/index.js",
   "repository": "https://github.com/hachther/mesomb-js-client.git",
   "author": "Hachther LLC <contact@hachther.com>",
+  "keywords": ["MeSomb", "Orange Money", "Mobile Money", "Airtel Money"],
   "license": "MIT",
   "private": false,
   "devDependencies": {

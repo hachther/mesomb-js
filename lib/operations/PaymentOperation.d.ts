@@ -1,4 +1,5 @@
 import { Application, TransactionResponse } from '../models';
+import "isomorphic-fetch";
 /**
  * Containing all operations provided by MeSomb Payment Service.
  *
