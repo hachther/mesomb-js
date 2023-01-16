@@ -1,6 +1,5 @@
 import Settings from '../src/Settings';
 import { PaymentOperation, Signature } from '../src';
-import "isomorphic-fetch";
 
 const applicationKey = '2bb525516ff374bb52545bf22ae4da7d655ba9fd';
 const accessKey = 'c6c40b76-8119-4e93-81bf-bfb55417b392';

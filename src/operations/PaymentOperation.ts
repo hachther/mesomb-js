@@ -2,6 +2,7 @@ import Settings from '../Settings';
 import { Signature } from '../Signature';
 import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions';
 import { Application, TransactionResponse } from '../models';
+import "isomorphic-fetch";
 
 /**
  * Containing all operations provided by MeSomb Payment Service.
