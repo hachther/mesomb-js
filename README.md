@@ -26,6 +26,10 @@ yarn install @hachther/mesomb
 
 ## Usage
 
+Check the full documentation [here](docs.md)
+
+Below some quick examples
+
 ### Collect money from an account
 
 ```JavaScript
