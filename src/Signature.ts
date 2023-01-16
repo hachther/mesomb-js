@@ -35,10 +35,13 @@ export class Signature {
 
     const canonicalHeaders = headersKeys.map((key) => `${key}:${headers[key]}`).join('\n');
 
-    const sha1 = require('crypto-js/sha1');
-    const hmacSha1 = require('crypto-js/hmac-sha1');
+    const crypto = require('crypto');
+    const payloadSha1 = crypto.createHash('sha1');
+    const canonicalSha1 = crypto.createHash('sha1');
+    const hmac = crypto.createHmac('sha1', credentials.secretKey);
 
-    const payloadHash = sha1(body ? JSON.stringify(body) : '{}');
+    payloadSha1.update(body ? JSON.stringify(body) : '{}')
+    const payloadHash = payloadSha1.digest('hex');
 
     const signedHeaders = headersKeys.join(';');
 
@@ -48,9 +51,10 @@ export class Signature {
 
     const scope = `${date.getFullYear()}${date.getMonth()}${date.getDate()}/${service}/mesomb_request`;
 
-    const stringToSign = `${algorithm}\n${timestamp}\n${scope}\n${sha1(canonicalRequest)}`;
+    canonicalSha1.update(canonicalRequest)
+    const stringToSign = `${algorithm}\n${timestamp}\n${scope}\n${canonicalSha1.digest('hex')}`;
 
-    const signature = hmacSha1(stringToSign, credentials.secretKey);
+    const signature = hmac.update(stringToSign).digest('hex');
 
     return `${algorithm} Credential=${credentials.accessKey}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
   }
