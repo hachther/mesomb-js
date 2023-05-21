@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to js-mesomb 👋</h1>
+<h1 style="text-align: center">Welcome to js-mesomb 👋</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-1.0-blue.svg?cacheSeconds=2592000" />
   <a href="https://mesomb.hachther.com/en/api/v1.1/schema/" target="_blank">
@@ -21,7 +21,9 @@
 ## Install
 
 ```sh
-yarn install @hachther/mesomb
+yarn add @hachther/mesomb
+# or
+npm install @hachther/mesomb
 ```
 
 ## Usage
@@ -32,6 +34,8 @@ Below some quick examples
 
 ### Collect money from an account
 
+ES6 import
+
 ```JavaScript
 import {PaymentOperation, Signature} from '@hachther/mesomb';
 
@@ -41,7 +45,20 @@ console.log(response.isOperationSuccess());
 console.log(response.isTransactionSuccess());
 ```
 
+Modular include
+
+```JavaScript
+const {PaymentOperation, Signature} = require('@hachther/mesomb');
+
+const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
+const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+console.log(response.isOperationSuccess());
+console.log(response.isTransactionSuccess());
+```
+
 ### Depose money in an account
+
+ES6 import
 
 ```JavaScript
 import {PaymentOperation, Signature} from '@hachther/mesomb';
@@ -52,7 +69,20 @@ console.log(response.isOperationSuccess());
 console.log(response.isTransactionSuccess());
 ```
 
+Modular include
+
+```JavaScript
+const {PaymentOperation, Signature} = require('@hachther/mesomb');
+
+const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
+const response = await payment.makeDeposit(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+console.log(response.isOperationSuccess());
+console.log(response.isTransactionSuccess());
+```
+
 ### Get application status
+
+ES6 import
 
 ```JavaScript
 import {PaymentOperation, Signature} from '@hachther/mesomb';
@@ -62,10 +92,32 @@ const application = await payment.getStatus();
 console.log(application);
 ```
 
+Modular include
+
+```JavaScript
+const {PaymentOperation, Signature} = require('@hachther/mesomb');
+
+const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
+const application = await payment.getStatus();
+console.log(application);
+```
+
 ### Get transactions by IDs
+
+ES6 import
 
 ```JavaScript
 import {PaymentOperation, Signature} from '@hachther/mesomb';
+
+const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
+const transactions = await payment.getTransactions(['ID1', 'ID2']);
+console.log(transactions);
+```
+
+Modular include
+
+```JavaScript
+const {PaymentOperation, Signature} = require('@hachther/mesomb');
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
 const transactions = await payment.getTransactions(['ID1', 'ID2']);
