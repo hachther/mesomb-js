@@ -90,4 +90,5 @@ export declare class PaymentOperation {
      */
     getStatus(date?: Date | undefined): Promise<Application>;
     getTransactions(ids: string[], date?: Date | undefined): Promise<Array<Record<string, any>>>;
+    checkTransactionStatus(...ids: string[]): Promise<any>;
 }
