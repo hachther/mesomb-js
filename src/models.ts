@@ -2,9 +2,9 @@ export class TransactionResponse {
   private readonly success: boolean;
   private message: string;
   private redirect: string;
-  private data: Record<string, any>;
-  private reference: string;
-  private status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  data: Record<string, any>;
+  reference: string;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
 
   constructor(data: Record<string, any>) {
     this.success = data.success;

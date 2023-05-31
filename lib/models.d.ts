@@ -2,9 +2,9 @@ export declare class TransactionResponse {
     private readonly success;
     private message;
     private redirect;
-    private data;
-    private reference;
-    private status;
+    data: Record<string, any>;
+    reference: string;
+    status: 'SUCCESS' | 'FAILED' | 'PENDING';
     constructor(data: Record<string, any>);
     isOperationSuccess(): boolean;
     isTransactionSuccess(): boolean;
