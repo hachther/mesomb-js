@@ -1,8 +1,9 @@
-import Settings from '../Settings';
+import MeSomb from '../MeSomb';
 import { Signature } from '../Signature';
-import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions';
-import { Application, TransactionResponse } from '../models';
+import {ServiceNotFoundError, ServerError, PermissionDeniedError, InvalidClientRequestError} from '../exceptions';
+import {Application, TransactionResponse} from '../models';
 import "isomorphic-fetch";
+import {MoneyCollectRequest, MoneyDepositRequest} from "../types";
 
 /**
  * Containing all operations provided by MeSomb Payment Service.
@@ -46,7 +47,7 @@ export class PaymentOperation {
   }
 
   private _buildUrl(endpoint: string): string {
-    return `${Settings.HOST}/en/api/${Settings.APIVERSION}/${endpoint}`;
+    return `${MeSomb.HOST}/${MeSomb.LANGUAGE}/api/${MeSomb.APIVERSION}/${endpoint}`;
   }
 
   private _getAuthorization(
@@ -55,7 +56,7 @@ export class PaymentOperation {
     date: Date,
     nonce: string,
     headers: Record<string, string> = {},
-    body: Record<string, any> | undefined = undefined,
+    body?: Record<string, any> | undefined,
   ): string {
     const url = this._buildUrl(endpoint);
 
@@ -107,23 +108,23 @@ export class PaymentOperation {
    *
    * @return TransactionResponse
    */
-  public async makeCollect(
-    amount: number,
-    service: string,
-    payer: string,
-    date: Date,
-    nonce: string,
-    trxID: string | number | null,
-    country: string = 'CM',
-    currency: string = 'XAF',
-    feesIncluded: boolean = true,
-    mode: 'synchronous' | 'asynchronous' = 'synchronous',
-    conversion: boolean = false,
-    location: Record<string, any> | undefined = undefined,
-    customer: Record<string, any> | undefined = undefined,
-    product: Record<string, any> | undefined = undefined,
-    extra: Record<string, any> | undefined = undefined,
-  ): Promise<TransactionResponse> {
+  public async makeCollect({
+    amount,
+    service,
+    payer,
+    date = new Date(),
+    nonce,
+    trxID,
+    country = 'CM',
+    currency = 'XAF',
+    feesIncluded = true,
+    mode = 'synchronous',
+    conversion = false,
+    location,
+    customer,
+    products,
+    extra,
+  }: MoneyCollectRequest): Promise<TransactionResponse> {
     const endpoint = 'payment/collect/';
     const url = this._buildUrl(endpoint);
 
@@ -135,6 +136,7 @@ export class PaymentOperation {
       currency,
       fees: feesIncluded,
       conversion,
+      source: `MeSombJS/v${MeSomb.VERSION}`,
     };
     if (location) {
       body.location = location;
@@ -142,8 +144,8 @@ export class PaymentOperation {
     if (customer) {
       body.customer = customer;
     }
-    if (product) {
-      body.product = product;
+    if (products) {
+      body.products = Array.isArray(products) ? products : [products];
     }
     if (extra) {
       body = Object.assign(body, extra);
@@ -194,25 +196,41 @@ export class PaymentOperation {
    * @param trxID ID of the transaction in your system
    * @param country country code 'CM' by default
    * @param currency currency of the transaction (XAF, XOF, ...) XAF by default
+   * @param location object containing the location of the customer check the documentation
+   * @param customer object containing information of the customer check the documentation
+   * @param product object containing information of the product check the documentation
    * @param extra Extra parameters to send in the body check the API documentation
    *
    * @return TransactionResponse
    */
-  public async makeDeposit(
-    amount: number,
-    service: string,
-    receiver: string,
-    date: Date,
-    nonce: string,
-    trxID: string | number | null,
-    country: string = 'CM',
-    currency: string = 'XAF',
-    extra: Record<string, any> | undefined = undefined,
-  ): Promise<TransactionResponse> {
+  public async makeDeposit({
+    amount,
+    service,
+    receiver,
+    date = new Date(),
+    nonce,
+    trxID,
+    country = 'CM',
+    currency = 'XAF',
+    location,
+    customer,
+    products,
+    extra
+  }: MoneyDepositRequest): Promise<TransactionResponse> {
     const endpoint = 'payment/deposit/';
     const url = this._buildUrl(endpoint);
 
     let body: Record<string, any> = { amount, receiver, service, country, currency };
+
+    if (location) {
+      body.location = location;
+    }
+    if (customer) {
+      body.customer = customer;
+    }
+    if (products) {
+      body.products = Array.isArray(products) ? products : [products];
+    }
     if (extra) {
       body = Object.assign(body, extra);
     }
@@ -263,7 +281,7 @@ export class PaymentOperation {
     field: string,
     action: 'SET' | 'UNSET',
     value: any = null,
-    date: Date | undefined = undefined,
+    date?: Date,
   ): Promise<Application> {
     const endpoint = 'payment/security/';
     const url = this._buildUrl(endpoint);
@@ -310,7 +328,7 @@ export class PaymentOperation {
    *
    * @param date date of the request
    */
-  public async getStatus(date: Date | undefined = undefined): Promise<Application> {
+  public async getStatus(date?: Date): Promise<Application> {
     const endpoint = 'payment/status/';
 
     if (!date) {
@@ -335,7 +353,7 @@ export class PaymentOperation {
     return new Application(await response.json());
   }
 
-  public async getTransactions(ids: string[], date: Date | undefined = undefined): Promise<Array<Record<string, any>>> {
+  public async getTransactions(ids: string[], date?: Date): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/?ids=${ids.join(',')}`;
 
     if (!date) {

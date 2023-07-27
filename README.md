@@ -37,10 +37,10 @@ Below some quick examples
 ES6 import
 
 ```JavaScript
-import {PaymentOperation, Signature} from '@hachther/mesomb';
+import {PaymentOperation, Signature, RandomGenerator} from '@hachther/mesomb';
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '677550203', nonce: RandomGenerator.nonce()});
 console.log(response.isOperationSuccess());
 console.log(response.isTransactionSuccess());
 ```
@@ -48,10 +48,10 @@ console.log(response.isTransactionSuccess());
 Modular include
 
 ```JavaScript
-const {PaymentOperation, Signature} = require('@hachther/mesomb');
+const {PaymentOperation, Signature, RandomGenerator} = require('@hachther/mesomb');
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeCollect(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '677550203', nonce: RandomGenerator.nonce()});
 console.log(response.isOperationSuccess());
 console.log(response.isTransactionSuccess());
 ```
@@ -61,10 +61,10 @@ console.log(response.isTransactionSuccess());
 ES6 import
 
 ```JavaScript
-import {PaymentOperation, Signature} from '@hachther/mesomb';
+import {PaymentOperation, Signature, RandomGenerator} from '@hachther/mesomb';
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeDeposit(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '677550203', nonce: RandomGenerator.nonce()});
 console.log(response.isOperationSuccess());
 console.log(response.isTransactionSuccess());
 ```
@@ -72,10 +72,10 @@ console.log(response.isTransactionSuccess());
 Modular include
 
 ```JavaScript
-const {PaymentOperation, Signature} = require('@hachther/mesomb');
+const {PaymentOperation, Signature, RandomGenerator} = require('@hachther/mesomb');
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeDeposit(100, 'MTN', '677550203', new Date(), Signature.nonceGenerator());
+const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '677550203', nonce: RandomGenerator.nonce()});
 console.log(response.isOperationSuccess());
 console.log(response.isTransactionSuccess());
 ```

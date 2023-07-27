@@ -5,7 +5,13 @@
   "main": "lib/index.js",
   "repository": "https://github.com/hachther/mesomb-js-client.git",
   "author": "Hachther LLC <contact@hachther.com>",
-  "keywords": ["MeSomb", "Orange Money", "Mobile Money", "Airtel Money"],
+  "types": "src/types.d.ts",
+  "keywords": [
+    "MeSomb",
+    "Orange Money",
+    "Mobile Money",
+    "Airtel Money"
+  ],
   "license": "MIT",
   "private": false,
   "devDependencies": {

@@ -1,5 +1,7 @@
-import { Application, TransactionResponse } from '../models';
+import Application from '../models/Application';
+import TransactionResponse from '../models/TransactionResponse';
 import "isomorphic-fetch";
+import { MoneyCollectRequest, MoneyDepositRequest } from "../types";
 /**
  * Containing all operations provided by MeSomb Payment Service.
  *
@@ -54,7 +56,7 @@ export declare class PaymentOperation {
      *
      * @return TransactionResponse
      */
-    makeCollect(amount: number, service: string, payer: string, date: Date, nonce: string, trxID: string | number | null, country?: string, currency?: string, feesIncluded?: boolean, mode?: 'synchronous' | 'asynchronous', conversion?: boolean, location?: Record<string, any> | undefined, customer?: Record<string, any> | undefined, product?: Record<string, any> | undefined, extra?: Record<string, any> | undefined): Promise<TransactionResponse>;
+    makeCollect({ amount, service, payer, date, nonce, trxID, country, currency, feesIncluded, mode, conversion, location, customer, products, extra, }: MoneyCollectRequest): Promise<TransactionResponse>;
     /**
      * Method to make deposit in a receiver mobile account.
      * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
@@ -67,11 +69,14 @@ export declare class PaymentOperation {
      * @param trxID ID of the transaction in your system
      * @param country country code 'CM' by default
      * @param currency currency of the transaction (XAF, XOF, ...) XAF by default
+     * @param location object containing the location of the customer check the documentation
+     * @param customer object containing information of the customer check the documentation
+     * @param product object containing information of the product check the documentation
      * @param extra Extra parameters to send in the body check the API documentation
      *
      * @return TransactionResponse
      */
-    makeDeposit(amount: number, service: string, receiver: string, date: Date, nonce: string, trxID: string | number | null, country?: string, currency?: string, extra?: Record<string, any> | undefined): Promise<TransactionResponse>;
+    makeDeposit({ amount, service, receiver, date, nonce, trxID, country, currency, location, customer, products, extra }: MoneyDepositRequest): Promise<TransactionResponse>;
     /**
      * Update security parameters of your service on MeSomb
      *
@@ -82,12 +87,12 @@ export declare class PaymentOperation {
      *
      * @return Application
      */
-    updateSecurity(field: string, action: 'SET' | 'UNSET', value?: any, date?: Date | undefined): Promise<Application>;
+    updateSecurity(field: string, action: 'SET' | 'UNSET', value?: any, date?: Date): Promise<Application>;
     /**
      * Get the current status of your service on MeSomb
      *
      * @param date date of the request
      */
-    getStatus(date?: Date | undefined): Promise<Application>;
-    getTransactions(ids: string[], date?: Date | undefined): Promise<Array<Record<string, any>>>;
+    getStatus(date?: Date): Promise<Application>;
+    getTransactions(ids: string[], date?: Date): Promise<Record<string, any>[]>;
 }

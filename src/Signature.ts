@@ -1,16 +1,6 @@
-import Settings from './Settings';
+import MeSomb from './MeSomb';
 
 export class Signature {
-  public static nonceGenerator(length = 40) {
-    let result = '';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-  }
-
   public static signRequest(
     service: string,
     method: string,
@@ -19,9 +9,9 @@ export class Signature {
     nonce: string,
     credentials: Record<string, string>,
     headers: Record<string, string> = {},
-    body: Record<string, any> | undefined = undefined,
+    body?: Record<string, any> | undefined,
   ): string {
-    const algorithm = Settings.ALGORITHM;
+    const algorithm = MeSomb.ALGORITHM;
     const parse = new URL(url);
     const canonicalQuery = parse.searchParams.toString();
 
