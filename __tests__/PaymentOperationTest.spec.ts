@@ -8,7 +8,7 @@ jest.setTimeout(30000);
 
 describe("Deposit Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.104:8000';
+    MeSomb.HOST = 'http://192.168.8.103:8000';
   })
   it('Should make deposit test with not service found',  async () => {
     expect.assertions(1);
@@ -104,7 +104,7 @@ describe("Deposit Operation", () => {
 
 describe("Collect Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.106:8000';
+    MeSomb.HOST = 'http://192.168.8.103:8000';
   })
   it('Should make payment test with not service found',  async () => {
     expect.assertions(1);
@@ -150,8 +150,8 @@ describe("Collect Operation", () => {
     });
     expect(response.success).toBeTruthy();
     expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(100);
-    expect(response.transaction.fees).toEqual(0);
+    expect(response.transaction.amount).toEqual(97);
+    expect(response.transaction.fees).toEqual(3);
     expect(response.transaction.service).toEqual('MTN');
     expect(response.transaction.b_party).toEqual('237670000000');
     expect(response.transaction.country).toEqual('CM');
@@ -179,8 +179,8 @@ describe("Collect Operation", () => {
     });
     expect(response.success).toBeTruthy();
     expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(100);
-    expect(response.transaction.fees).toEqual(0);
+    expect(response.transaction.amount).toEqual(97);
+    expect(response.transaction.fees).toEqual(3);
     expect(response.transaction.service).toEqual('MTN');
     expect(response.transaction.b_party).toEqual('237670000000');
     expect(response.transaction.country).toEqual('CM');
@@ -209,7 +209,7 @@ describe("Collect Operation", () => {
 
 describe("Security Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.104:8000';
+    MeSomb.HOST = 'http://192.168.8.103:8000';
   })
 
   it('Should unset whitelist IP',  async () => {
@@ -227,7 +227,7 @@ describe("Security Operation", () => {
 
 describe("Status Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.104:8000';
+    MeSomb.HOST = 'http://192.168.8.103:8000';
   })
 
   it('Should get status with not service found',  async () => {
@@ -255,9 +255,9 @@ describe("Status Operation", () => {
   });
 });
 
-describe("Transactions Operation", () => {
+describe("Get Transactions Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.106:8000';
+    MeSomb.HOST = 'http://192.168.8.103:8000';
   })
 
   it('Should get transactions with not service found',  async () => {
@@ -281,6 +281,37 @@ describe("Transactions Operation", () => {
   it('Should get transactions success',  async () => {
     const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
     const response = await payment.getTransactions(['9886f099-dee2-4eaa-9039-e92b2ee33353']);
+    expect(response.length).toEqual(1);
+    expect(response[0].pk).toEqual('9886f099-dee2-4eaa-9039-e92b2ee33353');
+  });
+});
+
+describe("Check Transactions Operation", () => {
+  beforeEach(() => {
+    MeSomb.HOST = 'http://192.168.8.103:8000';
+  })
+
+  it('Should check transactions with not service found',  async () => {
+    expect.assertions(1);
+    try {
+      const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
+      await payment.checkTransactions(['c6c40b76-8119-4e93-81bf-bfb55417b392']);
+    } catch (e: any) {
+      expect(e.name).toEqual('ServiceNotFoundError');
+    }
+  });
+  it('Should check transactions with not permission denied',  async () => {
+    expect.assertions(1);
+    try {
+      const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
+      await payment.checkTransactions(['c6c40b76-8119-4e93-81bf-bfb55417b392']);
+    } catch (e: any) {
+      expect(e.name).toEqual('PermissionDeniedError');
+    }
+  });
+  it('Should check transactions success',  async () => {
+    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
+    const response = await payment.checkTransactions(['9886f099-dee2-4eaa-9039-e92b2ee33353']);
     expect(response.length).toEqual(1);
     expect(response[0].pk).toEqual('9886f099-dee2-4eaa-9039-e92b2ee33353');
   });

@@ -37,7 +37,7 @@ Below some quick examples
 ES6 import
 
 ```JavaScript
-import {PaymentOperation, Signature, RandomGenerator} from '@hachther/mesomb';
+import {PaymentOperation, RandomGenerator} from '@hachther/mesomb';
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
 const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '677550203', nonce: RandomGenerator.nonce()});
@@ -48,7 +48,7 @@ console.log(response.isTransactionSuccess());
 Modular include
 
 ```JavaScript
-const {PaymentOperation, Signature, RandomGenerator} = require('@hachther/mesomb');
+const {PaymentOperation, RandomGenerator} = require('@hachther/mesomb');
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
 const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '677550203', nonce: RandomGenerator.nonce()});
@@ -61,7 +61,7 @@ console.log(response.isTransactionSuccess());
 ES6 import
 
 ```JavaScript
-import {PaymentOperation, Signature, RandomGenerator} from '@hachther/mesomb';
+import {PaymentOperation, RandomGenerator} from '@hachther/mesomb';
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
 const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '677550203', nonce: RandomGenerator.nonce()});
@@ -72,7 +72,7 @@ console.log(response.isTransactionSuccess());
 Modular include
 
 ```JavaScript
-const {PaymentOperation, Signature, RandomGenerator} = require('@hachther/mesomb');
+const {PaymentOperation, RandomGenerator} = require('@hachther/mesomb');
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
 const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '677550203', nonce: RandomGenerator.nonce()});

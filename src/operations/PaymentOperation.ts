@@ -1,7 +1,7 @@
 import MeSomb from '../MeSomb';
 import { Signature } from '../Signature';
 import {ServiceNotFoundError, ServerError, PermissionDeniedError, InvalidClientRequestError} from '../exceptions';
-import {Application, TransactionResponse} from '../models';
+import {Application, Transaction, TransactionResponse} from '../models';
 import "isomorphic-fetch";
 import {MoneyCollectRequest, MoneyDepositRequest} from "../types";
 
@@ -86,25 +86,73 @@ export class PaymentOperation {
     }
   }
 
+  private async _executeRequest(method: string, endpoint: string, date: Date, nonce: string, body: Record<string, any> | null = null, mode: string = 'asynchronous') {
+    const url = this._buildUrl(endpoint);
+    const headers: Record<string, string> = {
+      'x-mesomb-date': String(date.getTime()),
+      'x-mesomb-nonce': nonce,
+      'Content-Type': 'application/json',
+      'X-MeSomb-Application': this.applicationKey,
+      'X-MeSomb-OperationMode': mode,
+    };
+    if (body?.trxID) {
+      headers['X-MeSomb-TrxID'] = String(body.trxID);
+      delete body.trxID;
+    }
+    if (body) {
+      body.source = `MeSombJS/v${MeSomb.VERSION}`;
+    }
+
+    let authorization: string;
+    if (method === 'POST' && body) {
+      authorization = this._getAuthorization(
+        method,
+        endpoint,
+        date,
+        nonce,
+        { 'content-type': 'application/json' },
+        body,
+      );
+    } else {
+      authorization = this._getAuthorization(
+        method,
+        endpoint,
+        date,
+        nonce,
+      );
+    }
+    headers.Authorization = authorization;
+
+    const response = await fetch(url, {
+      method,
+      body: body ? JSON.stringify(body) : undefined,
+      headers,
+    });
+    if (response.status >= 400) {
+      await this.processClientException(response);
+    }
+    return await response.json()
+  }
+
   /**
    * Collect money a user account
    * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
    *
-   * @param amount amount to collect
-   * @param service MTN, ORANGE, AIRTEL
-   * @param payer account number to collect from
-   * @param date date of the request
-   * @param nonce unique string on each request
-   * @param trxID ID of the transaction in your system
-   * @param country country CM, NE
-   * @param currency code of the currency of the amount
-   * @param feesIncluded if your want MeSomb to include and compute fees in the amount to collect
-   * @param mode
-   * @param conversion In case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
-   * @param location object containing the location of the customer check the documentation
-   * @param customer object containing information of the customer check the documentation
-   * @param product object containing information of the product check the documentation
-   * @param extra Extra parameter to send in the body check the API documentation
+   * @param amount: amount to collect
+   * @param service: payment service with the possible values MTN, ORANGE, AIRTEL
+   * @param payer: account number to collect from
+   * @param date: date of the request
+   * @param nonce: unique string on each request
+   * @param country: 2 letters country code of the service (configured during your service registration in MeSomb)
+   * @param currency: currency of your service depending on your country
+   * @param fees: false if your want MeSomb fees to be computed and included in the amount to collect
+   * @param mode: asynchronous or synchronous
+   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
+   * @param location: Map containing the location of the customer with the following attributes: town, region and location all string.
+   * @param products: It is ArrayList of products. Each product are Map with the following attributes: name string, category string, quantity int and amount float
+   * @param customer: a Map containing information about the customer: phone string, email: string, first_name string, last_name string, address string, town string, region string and country string
+   * @param trxID: if you want to include your transaction ID in the request
+   * @param extra: Map to add some extra attribute depending on the API documentation
    *
    * @return TransactionResponse
    */
@@ -126,7 +174,6 @@ export class PaymentOperation {
     extra,
   }: MoneyCollectRequest): Promise<TransactionResponse> {
     const endpoint = 'payment/collect/';
-    const url = this._buildUrl(endpoint);
 
     let body: Record<string, any> = {
       amount,
@@ -136,8 +183,10 @@ export class PaymentOperation {
       currency,
       fees: feesIncluded,
       conversion,
-      source: `MeSombJS/v${MeSomb.VERSION}`,
     };
+    if (trxID) {
+      body.trxID = trxID;
+    }
     if (location) {
       body.location = location;
     }
@@ -151,55 +200,27 @@ export class PaymentOperation {
       body = Object.assign(body, extra);
     }
 
-    const authorization = this._getAuthorization(
-      'POST',
-      endpoint,
-      date,
-      nonce,
-      { 'content-type': 'application/json' },
-      body,
-    );
-
-    const headers: Record<string, string> = {
-      'x-mesomb-date': String(date.getTime()),
-      'x-mesomb-nonce': nonce,
-      Authorization: authorization,
-      'Content-Type': 'application/json',
-      'X-MeSomb-Application': this.applicationKey,
-      'X-MeSomb-OperationMode': mode,
-    };
-    if (trxID) {
-      headers['X-MeSomb-TrxID'] = String(trxID);
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-    });
-    if (response.status >= 400) {
-      await this.processClientException(response);
-    }
-
-    return new TransactionResponse(await response.json());
+    return new TransactionResponse(await this._executeRequest('POST', endpoint, date, nonce, body, mode));
   }
 
   /**
    * Method to make deposit in a receiver mobile account.
    * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
    *
-   * @param amount the amount of the transaction
-   * @param service service code (MTN, ORANGE, AIRTEL, ...)
-   * @param receiver receiver account (in the local phone number)
-   * @param date date of the request
-   * @param nonce Unique key generated for each transaction
-   * @param trxID ID of the transaction in your system
-   * @param country country code 'CM' by default
-   * @param currency currency of the transaction (XAF, XOF, ...) XAF by default
-   * @param location object containing the location of the customer check the documentation
-   * @param customer object containing information of the customer check the documentation
-   * @param product object containing information of the product check the documentation
-   * @param extra Extra parameters to send in the body check the API documentation
+   * @param amount: amount to collect
+   * @param service: payment service with the possible values MTN, ORANGE, AIRTEL
+   * @param receiver: account number to collect from
+   * @param date: date of the request
+   * @param nonce: unique string on each request
+   * @param country: 2 letters country code of the service (configured during your service registration in MeSomb)
+   * @param currency: currency of your service depending on your country
+   * @param fees: false if your want MeSomb fees to be computed and included in the amount to collect
+   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
+   * @param location: Map containing the location of the customer with the following attributes: town, region and location all string.
+   * @param products: It is ArrayList of products. Each product are Map with the following attributes: name string, category string, quantity int and amount float
+   * @param customer: a Map containing information about the customer: phone string, email: string, first_name string, last_name string, address string, town string, region string and country string
+   * @param trxID: if you want to include your transaction ID in the request
+   * @param extra: Map to add some extra attribute depending on the API documentation
    *
    * @return TransactionResponse
    */
@@ -212,16 +233,19 @@ export class PaymentOperation {
     trxID,
     country = 'CM',
     currency = 'XAF',
+    conversion = false,
     location,
     customer,
     products,
     extra
   }: MoneyDepositRequest): Promise<TransactionResponse> {
     const endpoint = 'payment/deposit/';
-    const url = this._buildUrl(endpoint);
 
-    let body: Record<string, any> = { amount, receiver, service, country, currency };
+    let body: Record<string, any> = { amount, receiver, service, country, currency, conversion };
 
+    if (trxID) {
+      body.trxID = trxID;
+    }
     if (location) {
       body.location = location;
     }
@@ -235,36 +259,7 @@ export class PaymentOperation {
       body = Object.assign(body, extra);
     }
 
-    const authorization = this._getAuthorization(
-      'POST',
-      endpoint,
-      date,
-      nonce,
-      { 'content-type': 'application/json' },
-      body,
-    );
-
-    const headers: Record<string, string> = {
-      'x-mesomb-date': String(date.getTime()),
-      'x-mesomb-nonce': nonce,
-      Authorization: authorization,
-      'Content-Type': 'application/json',
-      'X-MeSomb-Application': this.applicationKey,
-    }
-    if (trxID) {
-      headers['X-MeSomb-TrxID'] = String(trxID);
-    }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers,
-    });
-    if (response.status >= 400) {
-      await this.processClientException(response);
-    }
-
-    return new TransactionResponse(await response.json());
+    return new TransactionResponse(await this._executeRequest('POST', endpoint, date, nonce, body));
   }
 
   /**
@@ -284,7 +279,6 @@ export class PaymentOperation {
     date?: Date,
   ): Promise<Application> {
     const endpoint = 'payment/security/';
-    const url = this._buildUrl(endpoint);
 
     if (!date) {
       date = new Date();
@@ -296,31 +290,7 @@ export class PaymentOperation {
       body.value = value;
     }
 
-    const authorization = this._getAuthorization(
-      'POST',
-      endpoint,
-      date,
-      '',
-      { 'content-type': 'application/json' },
-      body,
-    );
-
-    const response = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'x-mesomb-date': String(date.getTime()),
-        'x-mesomb-nonce': '',
-        Authorization: authorization,
-        'Content-Type': 'application/json',
-        'X-MeSomb-Application': this.applicationKey,
-      },
-    });
-    if (response.status >= 400) {
-      await this.processClientException(response);
-    }
-
-    return new Application(await response.json());
+    return new Application(await this._executeRequest('POST', endpoint, date, '', body));
   }
 
   /**
@@ -328,53 +298,18 @@ export class PaymentOperation {
    *
    * @param date date of the request
    */
-  public async getStatus(date?: Date): Promise<Application> {
+  public async getStatus(date: Date = new Date()): Promise<Application> {
     const endpoint = 'payment/status/';
-
-    if (!date) {
-      date = new Date();
-    }
-
-    const authorization = this._getAuthorization('GET', endpoint, date, '');
-
-    const response = await fetch(this._buildUrl(endpoint), {
-      method: 'GET',
-      headers: {
-        'x-mesomb-date': String(date.getTime()),
-        'x-mesomb-nonce': '',
-        Authorization: authorization,
-        'X-MeSomb-Application': this.applicationKey,
-      },
-    });
-    if (response.status >= 400) {
-      await this.processClientException(response);
-    }
-
-    return new Application(await response.json());
+    return new Application(await this._executeRequest('GET', endpoint, date, ''));
   }
 
-  public async getTransactions(ids: string[], date?: Date): Promise<Record<string, any>[]> {
-    const endpoint = `payment/transactions/?ids=${ids.join(',')}`;
+  public async getTransactions(ids: string[], source = 'MESOMB'): Promise<Record<string, any>[]> {
+    const endpoint = `payment/transactions/?ids=${ids.join(',')}&source=${source}`;
+    return (await this._executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
+  }
 
-    if (!date) {
-      date = new Date();
-    }
-
-    const authorization = this._getAuthorization('GET', endpoint, date, '');
-
-    const response = await fetch(this._buildUrl(endpoint), {
-      method: 'GET',
-      headers: {
-        'x-mesomb-date': String(date.getTime()),
-        'x-mesomb-nonce': '',
-        Authorization: authorization,
-        'X-MeSomb-Application': this.applicationKey,
-      },
-    });
-    if (response.status >= 400) {
-      await this.processClientException(response);
-    }
-
-    return await response.json();
+  public async checkTransactions(ids: string[], source = 'MESOMB'): Promise<Record<string, any>[]> {
+    const endpoint = `payment/transactions/check/?ids=${ids.join(',')}&source=${source}`;
+    return (await this._executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
   }
 }

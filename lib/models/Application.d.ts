@@ -4,13 +4,12 @@ export default class Application {
     private readonly balances;
     countries: string[];
     description: string;
-    isLive: boolean;
+    is_live: boolean;
     name: string;
-    private readonly security;
+    readonly security: any;
     status: 'LIVE' | 'PENDING' | 'DEVELOPMENT';
     url: string;
     constructor(data: Record<string, any>);
-    getSecurityField(field: string): any;
     /**
      * Get current balance
      *

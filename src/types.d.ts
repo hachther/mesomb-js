@@ -49,6 +49,7 @@ export interface MoneyDepositRequest {
   trxID?: string | number;
   country?: string;
   currency?: string;
+  conversion?: boolean;
   location?: Location;
   customer?: Customer;
   products?: Product[] | Product;
