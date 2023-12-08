@@ -1,7 +1,7 @@
 {
   "name": "@hachther/mesomb",
-  "version": "1.1.0",
-  "description": "JS client to perform mobile payment operation with MeSomb",
+  "version": "1.1.1",
+  "description": "MeSomb NodeJS client to perform mobile payment operation with MeSomb",
   "main": "lib/index.js",
   "repository": "https://github.com/hachther/mesomb-js-client.git",
   "author": "Hachther LLC <contact@hachther.com>",
@@ -10,7 +10,9 @@
     "MeSomb",
     "Orange Money",
     "Mobile Money",
-    "Airtel Money"
+    "Airtel Money",
+    "NodeJS",
+    "React Native"
   ],
   "license": "MIT",
   "private": false,

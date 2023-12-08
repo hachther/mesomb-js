@@ -8,7 +8,7 @@ jest.setTimeout(30000);
 
 describe("Deposit Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.103:8000';
+    MeSomb.HOST = 'http://192.168.100.10:8000';
   })
   it('Should make deposit test with not service found',  async () => {
     expect.assertions(1);
@@ -104,7 +104,7 @@ describe("Deposit Operation", () => {
 
 describe("Collect Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.103:8000';
+    MeSomb.HOST = 'http://192.168.100.10:8000';
   })
   it('Should make payment test with not service found',  async () => {
     expect.assertions(1);
@@ -151,6 +151,26 @@ describe("Collect Operation", () => {
     expect(response.success).toBeTruthy();
     expect(response.status).toEqual('SUCCESS');
     expect(response.transaction.amount).toEqual(97);
+    expect(response.transaction.fees).toEqual(3);
+    expect(response.transaction.service).toEqual('MTN');
+    expect(response.transaction.b_party).toEqual('237670000000');
+    expect(response.transaction.country).toEqual('CM');
+    expect(response.transaction.currency).toEqual('XAF');
+    expect(response.transaction.reference).toEqual('1');
+  });
+  it('Should make payment test with success without fees', async () => {
+    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
+    const response = await payment.makeCollect({
+      amount: 100,
+      service: 'MTN',
+      payer: '670000000',
+      nonce: RandomGenerator.nonce(),
+      trxID: '1',
+      fees: false
+    });
+    expect(response.success).toBeTruthy();
+    expect(response.status).toEqual('SUCCESS');
+    expect(response.transaction.amount).toEqual(100);
     expect(response.transaction.fees).toEqual(3);
     expect(response.transaction.service).toEqual('MTN');
     expect(response.transaction.b_party).toEqual('237670000000');
@@ -209,7 +229,7 @@ describe("Collect Operation", () => {
 
 describe("Security Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.103:8000';
+    MeSomb.HOST = 'http://192.168.100.10:8000';
   })
 
   it('Should unset whitelist IP',  async () => {
@@ -227,7 +247,7 @@ describe("Security Operation", () => {
 
 describe("Status Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.103:8000';
+    MeSomb.HOST = 'http://192.168.100.10:8000';
   })
 
   it('Should get status with not service found',  async () => {
@@ -257,7 +277,7 @@ describe("Status Operation", () => {
 
 describe("Get Transactions Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.103:8000';
+    MeSomb.HOST = 'http://192.168.100.10:8000';
   })
 
   it('Should get transactions with not service found',  async () => {
@@ -288,7 +308,7 @@ describe("Get Transactions Operation", () => {
 
 describe("Check Transactions Operation", () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://192.168.8.103:8000';
+    MeSomb.HOST = 'http://192.168.100.10:8000';
   })
 
   it('Should check transactions with not service found',  async () => {

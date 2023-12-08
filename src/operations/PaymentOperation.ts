@@ -165,7 +165,7 @@ export class PaymentOperation {
     trxID,
     country = 'CM',
     currency = 'XAF',
-    feesIncluded = true,
+    fees = true,
     mode = 'synchronous',
     conversion = false,
     location,
@@ -181,7 +181,7 @@ export class PaymentOperation {
       payer,
       country,
       currency,
-      fees: feesIncluded,
+      fees,
       conversion,
     };
     if (trxID) {

@@ -31,7 +31,7 @@ export interface MoneyCollectRequest {
   trxID?: string | number | null;
   country?: string;
   currency?: string;
-  feesIncluded?: boolean;
+  fees?: boolean;
   mode?: 'synchronous' | 'asynchronous';
   conversion?: boolean;
   location?: Location;
