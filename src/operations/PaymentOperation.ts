@@ -3,7 +3,7 @@ import { Signature } from '../Signature';
 import {ServiceNotFoundError, ServerError, PermissionDeniedError, InvalidClientRequestError} from '../exceptions';
 import {Application, Transaction, TransactionResponse} from '../models';
 import "isomorphic-fetch";
-import {MoneyCollectRequest, MoneyDepositRequest} from "../types";
+import { MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest } from '../types';
 
 /**
  * Containing all operations provided by MeSomb Payment Service.
@@ -47,7 +47,7 @@ export class PaymentOperation {
   }
 
   private _buildUrl(endpoint: string): string {
-    return `${MeSomb.HOST}/${MeSomb.LANGUAGE}/api/${MeSomb.APIVERSION}/${endpoint}`;
+    return `${MeSomb.HOST}/api/${MeSomb.APIVERSION}/${endpoint}`;
   }
 
   private _getAuthorization(
@@ -94,6 +94,7 @@ export class PaymentOperation {
       'Content-Type': 'application/json',
       'X-MeSomb-Application': this.applicationKey,
       'X-MeSomb-OperationMode': mode,
+      'Accept-Language': MeSomb.LANGUAGE,
     };
     if (body?.trxID) {
       headers['X-MeSomb-TrxID'] = String(body.trxID);
@@ -263,34 +264,32 @@ export class PaymentOperation {
   }
 
   /**
-   * Update security parameters of your service on MeSomb
+   * Method to refund customer based on a transaction
    *
-   * @param field which security field you want to update (check API documentation)
-   * @param action SET or UNSET
-   * @param value value of the field
-   * @param date date of the request
+   * @param id: id to transaction to refund
+   * @param amount: amount to refund
+   * @param nonce: unique string on each request
+   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
+   * @param currency: currency of your service depending on your country
    *
-   * @return Application
+   * @return TransactionResponse
    */
-  public async updateSecurity(
-    field: string,
-    action: 'SET' | 'UNSET',
-    value: any = null,
-    date?: Date,
-  ): Promise<Application> {
-    const endpoint = 'payment/security/';
+  public async refundTransaction({
+    id,
+    amount,
+    nonce,
+    conversion = false,
+    currency = 'XAF',
+  }: PaymentRefundRequest): Promise<TransactionResponse> {
+    const endpoint = 'payment/refund/';
 
-    if (!date) {
-      date = new Date();
+    let body: Record<string, any> = { id, currency, conversion };
+
+    if (amount) {
+      body.amount = amount;
     }
 
-    const body: Record<string, any> = { field, action };
-
-    if (action !== 'UNSET') {
-      body.value = value;
-    }
-
-    return new Application(await this._executeRequest('POST', endpoint, date, '', body));
+    return new TransactionResponse(await this._executeRequest('POST', endpoint, new Date(), nonce, body));
   }
 
   /**
@@ -303,11 +302,27 @@ export class PaymentOperation {
     return new Application(await this._executeRequest('GET', endpoint, date, ''));
   }
 
-  public async getTransactions(ids: string[], source = 'MESOMB'): Promise<Record<string, any>[]> {
+  /**
+   * Fetch transactions base on MeSomb IDs or external IDs
+   *
+   * @param ids: ids of the transactions
+   * @param source: origin of the ID of the transactions (MESOMB for MeSomb and EXTERNAL for your system)
+   *
+   * @return Transaction[]
+   */
+  public async getTransactions(ids: string[], source: 'MESOMB' | 'EXTERNAL' = 'MESOMB'): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/?ids=${ids.join(',')}&source=${source}`;
     return (await this._executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
   }
 
+  /**
+   * Check transactions base on MeSomb IDs or external IDs
+   *
+   * @param ids: ids of the transactions
+   * @param source: origin of the ID of the transactions (MESOMB for MeSomb and EXTERNAL for your system)
+   *
+   * @return Transaction[]
+   */
   public async checkTransactions(ids: string[], source = 'MESOMB'): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/check/?ids=${ids.join(',')}&source=${source}`;
     return (await this._executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));

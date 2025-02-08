@@ -56,6 +56,14 @@ export interface MoneyDepositRequest {
   extra?: Record<string, any>;
 }
 
+export interface PaymentRefundRequest {
+  id: string;
+  nonce: string;
+  amount?: number;
+  conversion?: boolean;
+  currency?: string;
+}
+
 export interface TransactionData {
   pk: string;
   status: 'SUCCESS' | 'PENDING' | 'FAILED' | 'COLLECTED';
