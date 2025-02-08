@@ -1,5 +1,5 @@
 export default class Product {
-  private data: Record<string, any>;
+  private readonly data: Record<string, any>;
 
   public name: string;
   public category?: string;

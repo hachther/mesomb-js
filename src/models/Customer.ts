@@ -1,5 +1,5 @@
 export default class Customer {
-  private data: Record<string, any>;
+  private readonly data: Record<string, any>;
 
   public email: string;
   public phone: string;

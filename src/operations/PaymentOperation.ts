@@ -14,6 +14,10 @@ import { AOperation } from './AOperation';
 export class PaymentOperation extends AOperation {
   service = 'payment';
 
+  public constructor({ applicationKey, accessKey, secretKey }: { applicationKey: string; accessKey: string; secretKey: string }) {
+    super({ target: applicationKey, accessKey, secretKey });
+  }
+
   /**
    * Collect money a user account
    * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)

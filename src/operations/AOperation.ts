@@ -4,11 +4,11 @@ import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceN
 
 export abstract class AOperation {
   /**
-   * Your service application key on MeSomb
+   * Your target service key (application, fund, provider) on MeSomb
    *
    * @private
    */
-  protected readonly applicationKey: string;
+  protected readonly target: string;
 
   /**
    * Your access key provided by MeSomb
@@ -27,15 +27,15 @@ export abstract class AOperation {
   protected service!: string;
 
   public constructor({
-    applicationKey,
+    target,
     accessKey,
     secretKey,
   }: {
-    applicationKey: string;
+    target: string;
     accessKey: string;
     secretKey: string;
   }) {
-    this.applicationKey = applicationKey;
+    this.target = target;
     this.accessKey = accessKey;
     this.secretKey = secretKey;
   }
@@ -90,10 +90,13 @@ export abstract class AOperation {
       'Accept-Language': MeSomb.LANGUAGE,
     };
     if (this.service === 'payment') {
-      headers['X-MeSomb-Application'] = this.applicationKey;
+      headers['X-MeSomb-Application'] = this.target;
     }
     if (this.service === 'fundraising') {
-      headers['X-MeSomb-Fund'] = this.applicationKey
+      headers['X-MeSomb-Fund'] = this.target
+    }
+    if (this.service === 'wallet') {
+      headers['X-MeSomb-Provider'] = this.target
     }
     if (body?.trxID) {
       headers['X-MeSomb-TrxID'] = String(body.trxID);

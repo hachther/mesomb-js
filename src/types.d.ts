@@ -110,3 +110,14 @@ export interface MoneyContributeRequest {
   currency?: string;
   conversion?: boolean;
 }
+
+export interface WalletCreationRequest {
+  firstName?: string;
+  lastName: string;
+  email?: string;
+  phoneNumber: string;
+  gender: 'MAN' | 'WOMAN';
+  number?: string;
+  country?: string;
+  nonce: string;
+}

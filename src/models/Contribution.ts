@@ -4,7 +4,7 @@ import Location from "./Location";
 import Product from "./Product";
 
 export default class Contribution {
-  private data: Record<string, any>;
+  private readonly data: Record<string, any>;
 
   public pk: string;
   public status: string;
@@ -16,7 +16,7 @@ export default class Contribution {
   public message: string;
   public service: string;
   public reference?: string;
-  public ts: Date;
+  public date: Date;
   public country: string;
   public currency: string;
   // tslint:disable-next-line:variable-name
@@ -37,7 +37,7 @@ export default class Contribution {
     this.message = data.message;
     this.service = data.service;
     this.reference = data.reference;
-    this.ts = data.ts;
+    this.date = new Date(data.ts);
     this.country = data.country;
     this.currency = data.currency;
     this.finTrxId = data.fin_trx_id;

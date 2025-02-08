@@ -1,5 +1,5 @@
 export default class Location {
-  private data: Record<string, any>;
+  private readonly data: Record<string, any>;
 
   public town: string;
   public region: string;

@@ -8,7 +8,7 @@ export class FundraisingOperation extends AOperation {
   protected service = 'fundraising';
 
   public constructor({ fundKey, accessKey, secretKey }: { fundKey: string; accessKey: string; secretKey: string }) {
-    super({ applicationKey: fundKey, accessKey, secretKey });
+    super({ target: fundKey, accessKey, secretKey });
   }
 
   /**
