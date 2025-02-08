@@ -23,6 +23,6 @@ export default class TransactionResponse {
   }
 
   public isTransactionSuccess(): boolean {
-    return this.success && this.status === 'SUCCESS';
+    return this.transaction?.isSuccess() === true;
   }
 }

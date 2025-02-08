@@ -24,7 +24,7 @@ export interface Customer {
 
 export interface MoneyCollectRequest {
   amount: number;
-  service: string;
+  service: 'MTN' | 'ORANGE' | 'AIRTEL';
   payer: string;
   date?: Date;
   nonce: string;
@@ -81,4 +81,32 @@ export interface TransactionData {
   customer?: Customer | null;
   location?: Location | number;
   products?: Products[];
+}
+
+
+/**
+ * @param amount: amount to collect
+ */
+export interface MoneyContributeRequest {
+  contact?: {
+    email: string;
+    phoneNumber: string;
+  };
+  service: 'MTN' | 'ORANGE' | 'AIRTEL';
+  payer: string;
+  fullName?: {
+    firstName?: string;
+    lastName: string;
+  };
+  amount: number;
+  anonymous?: boolean;
+  location?: Location;
+  acceptTerms?: boolean;
+  date?: Date;
+  nonce: string;
+  trxID?: string | number | null;
+  mode?: 'synchronous' | 'asynchronous';
+  country?: string;
+  currency?: string;
+  conversion?: boolean;
 }

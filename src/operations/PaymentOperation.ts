@@ -4,136 +4,15 @@ import {ServiceNotFoundError, ServerError, PermissionDeniedError, InvalidClientR
 import {Application, Transaction, TransactionResponse} from '../models';
 import "isomorphic-fetch";
 import { MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest } from '../types';
+import { AOperation } from './AOperation';
 
 /**
  * Containing all operations provided by MeSomb Payment Service.
  *
  * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
  */
-export class PaymentOperation {
-  /**
-   * Your service application key on MeSomb
-   *
-   * @private
-   */
-  private readonly applicationKey: string;
-
-  /**
-   * Your access key provided by MeSomb
-   *
-   * @private
-   */
-  private readonly accessKey: string;
-
-  /**
-   * Your secret key provided by MeSomb
-   *
-   * @private
-   */
-  private readonly secretKey: string;
-
-  public constructor({
-    applicationKey,
-    accessKey,
-    secretKey,
-  }: {
-    applicationKey: string;
-    accessKey: string;
-    secretKey: string;
-  }) {
-    this.applicationKey = applicationKey;
-    this.accessKey = accessKey;
-    this.secretKey = secretKey;
-  }
-
-  private _buildUrl(endpoint: string): string {
-    return `${MeSomb.HOST}/api/${MeSomb.APIVERSION}/${endpoint}`;
-  }
-
-  private _getAuthorization(
-    method: string,
-    endpoint: string,
-    date: Date,
-    nonce: string,
-    headers: Record<string, string> = {},
-    body?: Record<string, any> | undefined,
-  ): string {
-    const url = this._buildUrl(endpoint);
-
-    const credentials = { accessKey: this.accessKey, secretKey: this.secretKey };
-
-    return Signature.signRequest('payment', method, url, date, nonce, credentials, headers, body || {});
-  }
-
-  private async processClientException(response: Response) {
-    let message: string = await response.text();
-    let code: string | undefined;
-    if (message.startsWith('{')) {
-      const data = JSON.parse(message);
-      message = data.detail;
-      code = data.code;
-    }
-    switch (response.status) {
-      case 404:
-        throw new ServiceNotFoundError(message);
-      case 403:
-      case 401:
-        throw new PermissionDeniedError(message);
-      case 400:
-        throw new InvalidClientRequestError(message, code);
-      default:
-        throw new ServerError(message, code);
-    }
-  }
-
-  private async _executeRequest(method: string, endpoint: string, date: Date, nonce: string, body: Record<string, any> | null = null, mode: string = 'asynchronous') {
-    const url = this._buildUrl(endpoint);
-    const headers: Record<string, string> = {
-      'x-mesomb-date': String(date.getTime()),
-      'x-mesomb-nonce': nonce,
-      'Content-Type': 'application/json',
-      'X-MeSomb-Application': this.applicationKey,
-      'X-MeSomb-OperationMode': mode,
-      'Accept-Language': MeSomb.LANGUAGE,
-    };
-    if (body?.trxID) {
-      headers['X-MeSomb-TrxID'] = String(body.trxID);
-      delete body.trxID;
-    }
-    if (body) {
-      body.source = `MeSombJS/v${MeSomb.VERSION}`;
-    }
-
-    let authorization: string;
-    if (method === 'POST' && body) {
-      authorization = this._getAuthorization(
-        method,
-        endpoint,
-        date,
-        nonce,
-        { 'content-type': 'application/json' },
-        body,
-      );
-    } else {
-      authorization = this._getAuthorization(
-        method,
-        endpoint,
-        date,
-        nonce,
-      );
-    }
-    headers.Authorization = authorization;
-
-    const response = await fetch(url, {
-      method,
-      body: body ? JSON.stringify(body) : undefined,
-      headers,
-    });
-    if (response.status >= 400) {
-      await this.processClientException(response);
-    }
-    return await response.json()
-  }
+export class PaymentOperation extends AOperation {
+  service = 'payment';
 
   /**
    * Collect money a user account
@@ -201,7 +80,7 @@ export class PaymentOperation {
       body = Object.assign(body, extra);
     }
 
-    return new TransactionResponse(await this._executeRequest('POST', endpoint, date, nonce, body, mode));
+    return new TransactionResponse(await this.executeRequest('POST', endpoint, date, nonce, body, mode));
   }
 
   /**
@@ -260,7 +139,7 @@ export class PaymentOperation {
       body = Object.assign(body, extra);
     }
 
-    return new TransactionResponse(await this._executeRequest('POST', endpoint, date, nonce, body));
+    return new TransactionResponse(await this.executeRequest('POST', endpoint, date, nonce, body));
   }
 
   /**
@@ -283,13 +162,13 @@ export class PaymentOperation {
   }: PaymentRefundRequest): Promise<TransactionResponse> {
     const endpoint = 'payment/refund/';
 
-    let body: Record<string, any> = { id, currency, conversion };
+    const body: Record<string, any> = { id, currency, conversion };
 
     if (amount) {
       body.amount = amount;
     }
 
-    return new TransactionResponse(await this._executeRequest('POST', endpoint, new Date(), nonce, body));
+    return new TransactionResponse(await this.executeRequest('POST', endpoint, new Date(), nonce, body));
   }
 
   /**
@@ -299,7 +178,7 @@ export class PaymentOperation {
    */
   public async getStatus(date: Date = new Date()): Promise<Application> {
     const endpoint = 'payment/status/';
-    return new Application(await this._executeRequest('GET', endpoint, date, ''));
+    return new Application(await this.executeRequest('GET', endpoint, date, ''));
   }
 
   /**
@@ -312,7 +191,7 @@ export class PaymentOperation {
    */
   public async getTransactions(ids: string[], source: 'MESOMB' | 'EXTERNAL' = 'MESOMB'): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/?ids=${ids.join(',')}&source=${source}`;
-    return (await this._executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
+    return (await this.executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
   }
 
   /**
@@ -325,6 +204,6 @@ export class PaymentOperation {
    */
   public async checkTransactions(ids: string[], source = 'MESOMB'): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/check/?ids=${ids.join(',')}&source=${source}`;
-    return (await this._executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
+    return (await this.executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
   }
 }

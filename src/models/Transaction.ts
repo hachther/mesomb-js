@@ -7,7 +7,7 @@ export default class Transaction {
   private data: Record<string, any>;
 
   public pk: string;
-  public success: string;
+  public status: string;
   public type: string;
   public amount: number;
   public fees: number;
@@ -30,7 +30,7 @@ export default class Transaction {
     this.data = data;
 
     this.pk = data.pk;
-    this.success = data.success;
+    this.status = data.status;
     this.type = data.type;
     this.amount = data.amount;
     this.fees = data.fees;
@@ -53,6 +53,10 @@ export default class Transaction {
     }
 
     this.products = data.products?.map((d: Record<string, any>) => new Product(d));
+  }
+
+  public isSuccess(): boolean {
+    return this.status === 'SUCCESS';
   }
 
   /**
