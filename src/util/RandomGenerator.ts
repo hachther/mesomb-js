@@ -1,7 +1,7 @@
 /**
  * RandomGenerator class
  */
-export class RandomGenerator {
+export default class RandomGenerator {
 
   /**
    * Generate a random nonce

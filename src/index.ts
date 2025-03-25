@@ -1,6 +1,11 @@
 export { Signature } from './Signature';
-export { PaymentOperation } from './operations/PaymentOperation';
+export { default as PaymentOperation } from './operations/PaymentOperation';
 export { FundraisingOperation } from './operations/FundraisingOperation';
-export { RandomGenerator } from './util/RandomGenerator';
-export { Product, Customer, Location, TransactionResponse, Transaction, Application } from './models';
+export { default as RandomGenerator } from './util/RandomGenerator';
+export { default as Product } from './models/Product';
+export { default as Customer } from './models/Customer';
+export { default as Location } from './models/Location';
+export { default as TransactionResponse } from './models/TransactionResponse';
+export { default as Transaction } from './models/Transaction';
+export { default as Application } from './models/Application';
 export { default as MeSomb } from './MeSomb';

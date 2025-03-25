@@ -2,7 +2,7 @@ import { AOperation } from './AOperation';
 import { MoneyContributeRequest } from '../types';
 import ContributionResponse from '../models/ContributionResponse';
 import Contribution from '../models/Contribution';
-import { RandomGenerator } from '../util/RandomGenerator';
+import RandomGenerator from '../util/RandomGenerator';
 
 
 export class FundraisingOperation extends AOperation {

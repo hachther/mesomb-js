@@ -1,35 +1,24 @@
 import MeSomb from './MeSomb';
 
-/**
- * @class Signature
- */
 export class Signature {
-
-  /**
-   * @method signRequest
-   *
-   * @param {string} service - The targeted service
-   * @param {string} method - The HTTP method
-   * @param {string} url - The URL
-   * @param {Date} date - The date
-   * @param {string} nonce - The nonce
-   * @param {{ accessKey: string, secretKey: string }} credentials - The credentials
-   * @param {Record<string, string>} [headers={}] - The headers
-   * @param {Record<string, any>} [body] - The body
-   */
   public static signRequest(
     service: string,
     method: string,
     url: string,
     date: Date,
     nonce: string,
-    credentials: { accessKey: string, secretKey: string },
+    credentials: {secretKey: string; accessKey: string},
     headers: Record<string, string> = {},
-    body?: Record<string, any> | undefined,
+    body?: Record<string, any>,
   ): string {
     const algorithm = MeSomb.ALGORITHM;
+
+    const URL = require('url-parse');
     const parse = new URL(url);
-    const canonicalQuery = parse.searchParams.toString();
+    let canonicalQuery = '';
+    if (parse.query) {
+      canonicalQuery = parse.query.substring(1);
+    }
 
     const timestamp = date.getTime();
 
@@ -41,13 +30,9 @@ export class Signature {
 
     const canonicalHeaders = headersKeys.map((key) => `${key}:${headers[key]}`).join('\n');
 
-    const crypto = require('./crypto-custom.js');
-    const payloadSha1 = crypto.createHash('sha1');
-    const canonicalSha1 = crypto.createHash('sha1');
-    const hmac = crypto.createHmac('sha1', credentials.secretKey);
+    const CryptoJS = require('crypto-js');
 
-    payloadSha1.update(body ? JSON.stringify(body) : '{}')
-    const payloadHash = payloadSha1.digest('hex');
+    const payloadHash = CryptoJS.SHA1(body ? JSON.stringify(body) : '{}').toString();
 
     const signedHeaders = headersKeys.join(';');
 
@@ -57,10 +42,9 @@ export class Signature {
 
     const scope = `${date.getFullYear()}${date.getMonth()}${date.getDate()}/${service}/mesomb_request`;
 
-    canonicalSha1.update(canonicalRequest)
-    const stringToSign = `${algorithm}\n${timestamp}\n${scope}\n${canonicalSha1.digest('hex')}`;
+    const stringToSign = `${algorithm}\n${timestamp}\n${scope}\n${CryptoJS.SHA1(canonicalRequest).toString()}`;
 
-    const signature = hmac.update(stringToSign).digest('hex');
+    const signature = CryptoJS.HmacSHA1(stringToSign, credentials.secretKey).toString();
 
     return `${algorithm} Credential=${credentials.accessKey}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
   }

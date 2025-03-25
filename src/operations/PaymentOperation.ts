@@ -1,15 +1,15 @@
 import { Application, Transaction, TransactionResponse } from '../models';
 import 'isomorphic-fetch';
-import { MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest } from '../types';
+import { AirtimePurchaseRequest, MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest } from '../types';
 import { AOperation } from './AOperation';
-import { RandomGenerator } from '../util/RandomGenerator';
+import RandomGenerator from '../util/RandomGenerator';
 
 /**
  * Containing all operations provided by MeSomb Payment Service.
  *
  * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
  */
-export class PaymentOperation extends AOperation {
+export default class PaymentOperation extends AOperation {
   service = 'payment';
 
   public constructor({
@@ -133,6 +133,64 @@ export class PaymentOperation extends AOperation {
     const endpoint = 'payment/deposit/';
 
     let body: Record<string, any> = { amount, receiver, service, country, currency, conversion, amount_currency: currency, };
+
+    if (trxID) {
+      body.trxID = trxID;
+    }
+    if (location) {
+      body.location = location;
+    }
+    if (customer) {
+      body.customer = customer;
+    }
+    if (products) {
+      body.products = Array.isArray(products) ? products : [products];
+    }
+    if (extra) {
+      body = Object.assign(body, extra);
+    }
+
+    return new TransactionResponse(
+      await this.executeRequest('POST', endpoint, new Date(), nonce ?? RandomGenerator.nonce(), body),
+    );
+  }
+
+
+  /**
+   * Collect money to a user account
+   *
+   * @param {MoneyDepositRequest} params - The deposit parameters
+   * @param {number} params.amount - Amount of the transaction
+   * @param {'MTN' | 'ORANGE' | 'AIRTEL'} params.service - Payment service
+   * @param {string} params.receiver - Account number to depose in
+   * @param {'MTN' | 'ORANGE' | 'CAMTEL' | 'NEXTTEL' | 'YOOMEE'} params.merchant - Unique string on each request
+   * @param {string} [params.nonce] - Unique string on each request
+   * @param {string | number | null} [params.trxID] - If you want to include your transaction ID in the request
+   * @param {string} [params.country='CM'] - 2 letters country code of the service (configured during your service registration in MeSomb)
+   * @param {string} [params.currency='XAF'] - Currency of your service depending on your country
+   * @param {LocationRequest} [params.location] - Location of the customer
+   * @param {CustomerRequest} [params.customer] - Customer details
+   * @param {ProductRequest[] | ProductRequest} [params.products] - List of products
+   * @param {Record<string, any>} [params.extra] - Additional parameters
+   * @returns {Promise<TransactionResponse>} - The transaction response
+   */
+  public async purchaseAirtime({
+    amount,
+    service,
+    receiver,
+    merchant,
+    nonce,
+    trxID,
+    country = 'CM',
+    currency = 'XAF',
+    location,
+    customer,
+    products,
+    extra,
+  }: AirtimePurchaseRequest): Promise<TransactionResponse> {
+    const endpoint = 'payment/airtime/';
+
+    let body: Record<string, any> = { amount, receiver, service, country, currency, merchant, amount_currency: currency, };
 
     if (trxID) {
       body.trxID = trxID;

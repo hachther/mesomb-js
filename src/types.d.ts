@@ -123,6 +123,15 @@ export interface MoneyDepositRequest extends OnlinePaymentRequest {
   products?: ProductRequest[] | ProductRequest;
 }
 
+export interface AirtimePurchaseRequest extends OnlinePaymentRequest {
+  receiver: string;
+  merchant: 'MTN' | 'ORANGE' | 'CAMTEL' | 'NEXTTEL' | 'YOOMEE';
+
+  customer?: CustomerRequest;
+
+  products?: ProductRequest[] | ProductRequest;
+}
+
 /**
  * @interface PaymentRefundRequest
  *
@@ -228,7 +237,7 @@ export interface TransactionData {
   products: ProductData[];
 }
 
-export interface CustomerData {email: string; phone: string; town: string; region: string; country: string; first_name: string; last_name: string; address: string};
+export interface CustomerData {email: string; phone: string; town: string; region: string; country: string; first_name: string; last_name: string; address: string}
 
 export interface ProductData {id: string; name: string; category?: string; quantity: number; amount: number}
 

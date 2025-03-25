@@ -1,7 +1,7 @@
 import { AOperation } from './AOperation';
 import { WalletCreationRequest } from '../types';
 import Wallet from '../models/Wallet';
-import { RandomGenerator } from '../util/RandomGenerator';
+import RandomGenerator from '../util/RandomGenerator';
 import WalletTransaction from '../models/WalletTransaction';
 import PaginatedWallets from '../models/PaginatedWallets';
 import PaginatedWalletTransactions from '../models/PaginatedWalletTransactions';

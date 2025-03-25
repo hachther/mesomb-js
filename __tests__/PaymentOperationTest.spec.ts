@@ -102,6 +102,24 @@ describe("Deposit Operation", () => {
   });
 });
 
+describe("Airtime Purchase", () => {
+  beforeEach(() => {
+    MeSomb.HOST = 'http://127.0.0.1:8000';
+  })
+  it('Should purchase airtime test with success', async () => {
+    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
+    const response = await payment.purchaseAirtime({amount: 100, service: 'MTN', receiver: '670000000', merchant: 'MTN', nonce: RandomGenerator.nonce(), trxID: 1});
+    expect(response.success).toBeTruthy();
+    expect(response.status).toEqual('SUCCESS');
+    expect(response.transaction.amount).toEqual(100);
+    expect(response.transaction.fees).toEqual(0);
+    expect(response.transaction.service).toEqual('MTN');
+    expect(response.transaction.bParty).toEqual('237670000000');
+    expect(response.transaction.country).toEqual('CM');
+    expect(response.transaction.currency).toEqual('XAF');
+  });
+});
+
 describe("Collect Operation", () => {
   beforeEach(() => {
     MeSomb.HOST = 'http://127.0.0.1:8000';
