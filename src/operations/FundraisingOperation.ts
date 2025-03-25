@@ -2,32 +2,44 @@ import { AOperation } from './AOperation';
 import { MoneyContributeRequest } from '../types';
 import ContributionResponse from '../models/ContributionResponse';
 import Contribution from '../models/Contribution';
+import { RandomGenerator } from '../util/RandomGenerator';
 
 
 export class FundraisingOperation extends AOperation {
   protected service = 'fundraising';
 
-  public constructor({ fundKey, accessKey, secretKey }: { fundKey: string; accessKey: string; secretKey: string }) {
-    super({ target: fundKey, accessKey, secretKey });
+  public constructor({
+    fundKey,
+    accessKey,
+    secretKey,
+    language = 'en',
+  }: {
+    fundKey: string;
+    accessKey: string;
+    secretKey: string;
+    language?: string;
+  }) {
+    super({ target: fundKey, accessKey, secretKey, language });
   }
 
   /**
    * Collect money a user account
    * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
    *
-   * @param amount: amount to collect
-   * @param service: payment service with the possible values MTN, ORANGE, AIRTEL
-   * @param payer: account number to collect from
-   * @param date: date of the request
-   * @param nonce: unique string on each request
-   * @param country: 2 letters country code of the service (configured during your service registration in MeSomb)
-   * @param currency: currency of your service depending on your country
-   * @param mode: asynchronous or synchronous
-   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
-   * @param location: Map containing the location of the customer with the following attributes: town, region and location all string.
-   * @param contact: Contact of the contributor with the following attributes: phoneNumber string, email string. If contribution is anonymous, this field is not required
-   * @param fullName: Full name of the contributor with the following attributes: firstName string, lastName string. If contribution is anonymous, this field is not required
-   * @param trxID: if you want to include your contribution ID in the request
+   * @param {MoneyContributeRequest} params - amount to collect
+   * @param {'MTN' | 'ORANGE' | 'AIRTEL'} params.service - payment service with the possible values MTN, ORANGE, AIRTEL
+   * @param {string} params.payer - account number to collect from
+   * @param {string} [params.nonce] - unique string on each request
+   * @param {string} [params.country='CM'] - 2 letters country code of the service (configured during your service registration in MeSomb)
+   * @param {string} [params.currency='XAF'] - currency of your service depending on your country
+   * @param {string} [params.mode] - asynchronous or synchronous
+   * @param {boolean} [params.conversion=false] - true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
+   * @param {LocationRequest} [params.location] - Map containing the location of the customer with the following attributes: town, region and location all string.
+   * @param {boolean} [params.anonymous=false] - true if the contribution is anonymous
+   * @param {boolean} [params.acceptTerms=true] - true if the contributor accept the terms
+   * @param {Contact} [params.contact] - Contact of the contributor with the following attributes: phoneNumber string, email string. If contribution is anonymous, this field is not required
+   * @param {FullName} [params.fullName] - Full name of the contributor with the following attributes: firstName string, lastName string. If contribution is anonymous, this field is not required
+   * @param {string} [params.trxID] - if you want to include your contribution ID in the request
    *
    * @return TransactionResponse
    */
@@ -40,7 +52,6 @@ export class FundraisingOperation extends AOperation {
     anonymous = false,
     location,
     acceptTerms = true,
-    date = new Date(),
     nonce,
     trxID,
     mode = 'synchronous',
@@ -83,18 +94,23 @@ export class FundraisingOperation extends AOperation {
       }
     }
 
-    return new ContributionResponse(await this.executeRequest('POST', endpoint, date, nonce, body, mode));
+    return new ContributionResponse(
+      await this.executeRequest('POST', endpoint, new Date(), nonce ?? RandomGenerator.nonce(), body, mode),
+    );
   }
 
   /**
    * Fetch contributions base on MeSomb IDs or external IDs
    *
-   * @param ids: ids of the contributions
-   * @param source: origin of the ID of the contributions (MESOMB for MeSomb and EXTERNAL for your system)
+   * @param {string[]} ids - ids of the contributions
+   * @param {'MESOMB' | 'EXTERNAL'} [source='MESOMB'] - origin of the ID of the contributions (MESOMB for MeSomb and EXTERNAL for your system)
    *
    * @return Contribution[]
    */
-  public async getContributions(ids: string[], source: 'MESOMB' | 'EXTERNAL' = 'MESOMB'): Promise<Record<string, any>[]> {
+  public async getContributions(
+    ids: string[],
+    source: 'MESOMB' | 'EXTERNAL' = 'MESOMB',
+  ): Promise<Record<string, any>[]> {
     const endpoint = `fundraising/contributions/?ids=${ids.join(',')}&source=${source}`;
     return (await this.executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Contribution(d));
   }
@@ -102,8 +118,8 @@ export class FundraisingOperation extends AOperation {
   /**
    * Check contributions base on MeSomb IDs or external IDs
    *
-   * @param ids: ids of the contributions
-   * @param source: origin of the ID of the contributions (MESOMB for MeSomb and EXTERNAL for your system)
+   * @param {string[]} ids - ids of the contributions
+   * @param {'MESOMB' | 'EXTERNAL'} [source='MESOMB'] - origin of the ID of the contributions (MESOMB for MeSomb and EXTERNAL for your system)
    *
    * @return Contribution[]
    */

@@ -1,3 +1,12 @@
+import { LocationData } from '../types';
+
+/**
+ * Location model
+ *
+ * @property {string} town - The location's town
+ * @property {string} region - The location's region
+ * @property {string} country - The location's country
+ */
 export default class Location {
   private readonly data: Record<string, any>;
 
@@ -5,7 +14,7 @@ export default class Location {
   public region: string;
   public country: string;
 
-  public constructor(data: Record<string, any>) {
+  public constructor(data: LocationData) {
     this.data = data;
 
     this.town = data.town;
@@ -13,7 +22,12 @@ export default class Location {
     this.country = data.country;
   }
 
-  public toJSON() {
+  /**
+   * Get the data receive from the server
+   *
+   * @returns {Record<string, any>}
+   */
+  public getData() {
     return this.data;
   }
 }

@@ -16,7 +16,7 @@ describe("Deposit Operation", () => {
       const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
       const nonce = 'lkakdio90fsd8fsf';
 
-      await payment.makeDeposit({amount: 5, service: 'MTN', receiver: '670000000', nonce, trxID: 1});
+      const r = await payment.makeDeposit({amount: 5, service: 'MTN', receiver: '670000000', nonce, trxID: 1});
     } catch (e: any) {
       expect(e.name).toEqual('ServiceNotFoundError');
     }
@@ -158,7 +158,7 @@ describe("Collect Operation", () => {
     expect(response.transaction.country).toEqual('CM');
     expect(response.transaction.currency).toEqual('XAF');
     expect(response.transaction.reference).toEqual('1');
-    expect(response.transaction.toJSON()).not.toBeNull()
+    expect(response.transaction.getData()).not.toBeNull()
   });
   it('Should make payment test with success without fees', async () => {
     const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
@@ -334,10 +334,7 @@ describe("Refund Transactions Operation", () => {
 
   it('Should refund transaction', async () => {
     const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.refundTransaction({
-      id: 'a483a9e8-51d7-44c9-875b-1305b1801274',
-      nonce: RandomGenerator.nonce(),
-    });
+    const response = await payment.refundTransaction('a483a9e8-51d7-44c9-875b-1305b1801274', {});
     expect(response.transaction.amount).toBeGreaterThan(0);
   })
 });

@@ -1,7 +1,21 @@
+/**
+ * WalletTransaction model
+ *
+ * @property {string} id - The transaction's id
+ * @property {string} status - The transaction's status
+ * @property {string} type - The transaction's type
+ * @property {number} amount - The transaction's amount
+ * @property {-1 | 1} direction - The transaction's direction
+ * @property {string} wallet - The transaction's wallet
+ * @property {number} balanceAfter - The balance after the transaction
+ * @property {Date} date - The transaction's date
+ * @property {string} country - The transaction's country
+ * @property {string} finTrxId - The transaction's financial transaction id
+ */
 export default class WalletTransaction {
   private readonly data: Record<string, any>;
 
-  public id: string;
+  public id: number;
   public status: string;
   public type: string;
   public amount: number;
@@ -12,10 +26,10 @@ export default class WalletTransaction {
   public country: string;
   public finTrxId: string;
 
-  public constructor(data: Record<string, any>) {
+  public constructor(data: {id: number; status: string; type: string; amount: number; direction: -1 | 1; wallet: string; balance_after: number; ts: string; country: string; fin_trx_id: string}) {
     this.data = data;
 
-    this.id = data.pk;
+    this.id = data.id;
     this.status = data.status;
     this.type = data.type;
     this.amount = data.amount;
@@ -28,9 +42,9 @@ export default class WalletTransaction {
   }
 
   /**
-   * @return: data from the server
+   * @return {Record<string, any>} data from the server
    */
-  public toJSON(): Record<string, any> {
+  public getData(): Record<string, any> {
     return this.data;
   }
 }

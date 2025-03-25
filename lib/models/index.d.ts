@@ -4,3 +4,8 @@ export { default as Location } from './Location';
 export { default as Product } from './Product';
 export { default as Transaction } from './Transaction';
 export { default as TransactionResponse } from './TransactionResponse';
+export { default as ContributionResponse } from './ContributionResponse';
+export { default as PaginatedWallets } from './PaginatedWallets';
+export { default as PaginatedWalletTransactions } from './PaginatedWalletTransactions';
+export { default as Wallet } from './Wallet';
+export { default as WalletTransaction } from './WalletTransaction';

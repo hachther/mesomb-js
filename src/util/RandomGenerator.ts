@@ -1,4 +1,14 @@
+/**
+ * RandomGenerator class
+ */
 export class RandomGenerator {
+
+  /**
+   * Generate a random nonce
+   *
+   * @param {number} [length=40] - The length of the nonce
+   * @returns {string}
+   */
   public static nonce(length = 40) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

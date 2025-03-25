@@ -1,10 +1,8 @@
-import MeSomb from '../MeSomb';
-import { Signature } from '../Signature';
-import {ServiceNotFoundError, ServerError, PermissionDeniedError, InvalidClientRequestError} from '../exceptions';
-import {Application, Transaction, TransactionResponse} from '../models';
-import "isomorphic-fetch";
+import { Application, Transaction, TransactionResponse } from '../models';
+import 'isomorphic-fetch';
 import { MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest } from '../types';
 import { AOperation } from './AOperation';
+import { RandomGenerator } from '../util/RandomGenerator';
 
 /**
  * Containing all operations provided by MeSomb Payment Service.
@@ -14,29 +12,40 @@ import { AOperation } from './AOperation';
 export class PaymentOperation extends AOperation {
   service = 'payment';
 
-  public constructor({ applicationKey, accessKey, secretKey }: { applicationKey: string; accessKey: string; secretKey: string }) {
-    super({ target: applicationKey, accessKey, secretKey });
+  public constructor({
+    applicationKey,
+    accessKey,
+    secretKey,
+    language = 'en',
+  }: {
+    applicationKey: string;
+    accessKey: string;
+    secretKey: string;
+    language?: string;
+  }) {
+    super({ target: applicationKey, accessKey, secretKey, language });
   }
 
   /**
    * Collect money a user account
-   * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
    *
-   * @param amount: amount to collect
-   * @param service: payment service with the possible values MTN, ORANGE, AIRTEL
-   * @param payer: account number to collect from
-   * @param date: date of the request
-   * @param nonce: unique string on each request
-   * @param country: 2 letters country code of the service (configured during your service registration in MeSomb)
-   * @param currency: currency of your service depending on your country
-   * @param fees: false if your want MeSomb fees to be computed and included in the amount to collect
-   * @param mode: asynchronous or synchronous
-   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
-   * @param location: Map containing the location of the customer with the following attributes: town, region and location all string.
-   * @param products: It is ArrayList of products. Each product are Map with the following attributes: name string, category string, quantity int and amount float
-   * @param customer: a Map containing information about the customer: phone string, email: string, first_name string, last_name string, address string, town string, region string and country string
-   * @param trxID: if you want to include your transaction ID in the request
-   * @param extra: Map to add some extra attribute depending on the API documentation
+   * @param {MoneyCollectRequest} params - collection parameter
+   * @param {number} params.amount - Amount of the transaction
+   * @param {'MTN' | 'ORANGE' | 'AIRTEL'} params.service - Payment service
+   * @param {string} params.payer - Account number to collect from
+   * @param {string} [params.nonce] - Unique string on each request
+   * @param {string | number } [params.trxID] - If you want to include your transaction ID in the request
+   * @param {string} [params.country='CM'] - 2 letters country code of the service (configured during your service registration in MeSomb)
+   * @param {string} [params.currency='XAF'] - Currency of your service depending on your country
+   * @param {boolean} [params.fees=true] - True if you want to include the fees in the amount
+   * @param {string} [params.mode='synchronous'] - Mode of the transaction (synchronous or asynchronous)
+   * @param {boolean} [params.conversion=false] - True in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
+   * @param {LocationRequest} [params.location] - Location of the customer
+   * @param {CustomerRequest} [params.customer] - Customer details
+   * @param {ProductRequest[] | ProductRequest} [params.products] - List of products
+   * @param {Record<string, any>} [params.extra] - Additional parameters
+   *
+   * @returns {Promise<TransactionResponse>} - The transaction response
    *
    * @return TransactionResponse
    */
@@ -44,7 +53,6 @@ export class PaymentOperation extends AOperation {
     amount,
     service,
     payer,
-    date = new Date(),
     nonce,
     trxID,
     country = 'CM',
@@ -65,6 +73,7 @@ export class PaymentOperation extends AOperation {
       payer,
       country,
       currency,
+      amount_currency: currency,
       fees,
       conversion,
     };
@@ -84,35 +93,33 @@ export class PaymentOperation extends AOperation {
       body = Object.assign(body, extra);
     }
 
-    return new TransactionResponse(await this.executeRequest('POST', endpoint, date, nonce, body, mode));
+    return new TransactionResponse(
+      await this.executeRequest('POST', endpoint, new Date(), nonce ?? RandomGenerator.nonce(), body, mode),
+    );
   }
 
   /**
-   * Method to make deposit in a receiver mobile account.
-   * [Check the documentation here](https://mesomb.hachther.com/en/api/schema/)
+   * Collect money to a user account
    *
-   * @param amount: amount to collect
-   * @param service: payment service with the possible values MTN, ORANGE, AIRTEL
-   * @param receiver: account number to collect from
-   * @param date: date of the request
-   * @param nonce: unique string on each request
-   * @param country: 2 letters country code of the service (configured during your service registration in MeSomb)
-   * @param currency: currency of your service depending on your country
-   * @param fees: false if your want MeSomb fees to be computed and included in the amount to collect
-   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
-   * @param location: Map containing the location of the customer with the following attributes: town, region and location all string.
-   * @param products: It is ArrayList of products. Each product are Map with the following attributes: name string, category string, quantity int and amount float
-   * @param customer: a Map containing information about the customer: phone string, email: string, first_name string, last_name string, address string, town string, region string and country string
-   * @param trxID: if you want to include your transaction ID in the request
-   * @param extra: Map to add some extra attribute depending on the API documentation
-   *
-   * @return TransactionResponse
+   * @param {MoneyDepositRequest} params - The deposit parameters
+   * @param {number} params.amount - Amount of the transaction
+   * @param {'MTN' | 'ORANGE' | 'AIRTEL'} params.service - Payment service
+   * @param {string} params.receiver - Account number to depose in
+   * @param {string} [params.nonce] - Unique string on each request
+   * @param {string | number | null} [params.trxID] - If you want to include your transaction ID in the request
+   * @param {string} [params.country='CM'] - 2 letters country code of the service (configured during your service registration in MeSomb)
+   * @param {string} [params.currency='XAF'] - Currency of your service depending on your country
+   * @param {boolean} [params.conversion=false] - True in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
+   * @param {LocationRequest} [params.location] - Location of the customer
+   * @param {CustomerRequest} [params.customer] - Customer details
+   * @param {ProductRequest[] | ProductRequest} [params.products] - List of products
+   * @param {Record<string, any>} [params.extra] - Additional parameters
+   * @returns {Promise<TransactionResponse>} - The transaction response
    */
   public async makeDeposit({
     amount,
     service,
     receiver,
-    date = new Date(),
     nonce,
     trxID,
     country = 'CM',
@@ -121,11 +128,11 @@ export class PaymentOperation extends AOperation {
     location,
     customer,
     products,
-    extra
+    extra,
   }: MoneyDepositRequest): Promise<TransactionResponse> {
     const endpoint = 'payment/deposit/';
 
-    let body: Record<string, any> = { amount, receiver, service, country, currency, conversion };
+    let body: Record<string, any> = { amount, receiver, service, country, currency, conversion, amount_currency: currency, };
 
     if (trxID) {
       body.trxID = trxID;
@@ -143,46 +150,42 @@ export class PaymentOperation extends AOperation {
       body = Object.assign(body, extra);
     }
 
-    return new TransactionResponse(await this.executeRequest('POST', endpoint, date, nonce, body));
+    return new TransactionResponse(
+      await this.executeRequest('POST', endpoint, new Date(), nonce ?? RandomGenerator.nonce(), body),
+    );
   }
 
   /**
    * Method to refund customer based on a transaction
    *
-   * @param id: id to transaction to refund
-   * @param amount: amount to refund
-   * @param nonce: unique string on each request
-   * @param conversion: true in case of foreign currently defined if you want to rely on MeSomb to convert the amount in the local currency
-   * @param currency: currency of your service depending on your country
+   * @param id of the transaction
+   * @param params{PaymentRefundRequest} refund parameter
    *
    * @return TransactionResponse
    */
-  public async refundTransaction({
-    id,
-    amount,
-    nonce,
-    conversion = false,
-    currency = 'XAF',
-  }: PaymentRefundRequest): Promise<TransactionResponse> {
+  public async refundTransaction(
+    id: string,
+    { amount, nonce, conversion = false, currency = 'XAF' }: PaymentRefundRequest,
+  ): Promise<TransactionResponse> {
     const endpoint = 'payment/refund/';
 
-    const body: Record<string, any> = { id, currency, conversion };
+    const body: Record<string, any> = { id, currency, conversion, amount_currency: currency };
 
     if (amount) {
       body.amount = amount;
     }
 
-    return new TransactionResponse(await this.executeRequest('POST', endpoint, new Date(), nonce, body));
+    return new TransactionResponse(
+      await this.executeRequest('POST', endpoint, new Date(), nonce ?? RandomGenerator.nonce(), body),
+    );
   }
 
   /**
    * Get the current status of your service on MeSomb
-   *
-   * @param date date of the request
    */
-  public async getStatus(date: Date = new Date()): Promise<Application> {
+  public async getStatus(): Promise<Application> {
     const endpoint = 'payment/status/';
-    return new Application(await this.executeRequest('GET', endpoint, date, ''));
+    return new Application(await this.executeRequest('GET', endpoint, new Date(), ''));
   }
 
   /**
@@ -193,7 +196,10 @@ export class PaymentOperation extends AOperation {
    *
    * @return Transaction[]
    */
-  public async getTransactions(ids: string[], source: 'MESOMB' | 'EXTERNAL' = 'MESOMB'): Promise<Record<string, any>[]> {
+  public async getTransactions(
+    ids: string[],
+    source: 'MESOMB' | 'EXTERNAL' = 'MESOMB',
+  ): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/?ids=${ids.join(',')}&source=${source}`;
     return (await this.executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new Transaction(d));
   }

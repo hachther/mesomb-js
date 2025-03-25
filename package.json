@@ -3,6 +3,7 @@
   "version": "1.1.1",
   "description": "MeSomb NodeJS client to perform mobile payment operation with MeSomb",
   "main": "lib/index.js",
+  "module": "lib/index.js",
   "repository": "https://github.com/hachther/mesomb-js-client.git",
   "author": "Hachther LLC <contact@hachther.com>",
   "types": "src/types.d.ts",
@@ -31,7 +32,8 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "isomorphic-fetch": "^3.0.0"
+    "isomorphic-fetch": "^3.0.0",
+    "crypto-js": "^4.2.0"
   },
   "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
 }

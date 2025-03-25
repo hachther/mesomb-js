@@ -24,20 +24,25 @@ export abstract class AOperation {
    */
   protected readonly secretKey: string;
 
+  protected readonly language: string;
+
   protected service!: string;
 
   public constructor({
     target,
     accessKey,
     secretKey,
+    language = 'en',
   }: {
     target: string;
     accessKey: string;
     secretKey: string;
+    language?: string;
   }) {
     this.target = target;
     this.accessKey = accessKey;
     this.secretKey = secretKey;
+    this.language = language;
   }
 
   protected _buildUrl(endpoint: string): string {
@@ -87,7 +92,8 @@ export abstract class AOperation {
       'x-mesomb-nonce': nonce,
       'Content-Type': 'application/json',
       'X-MeSomb-OperationMode': mode,
-      'Accept-Language': MeSomb.LANGUAGE,
+      'X-MeSomb-Source': `MeSombJS/v${MeSomb.VERSION}`,
+      'Accept-Language': this.language,
     };
     if (this.service === 'payment') {
       headers['X-MeSomb-Application'] = this.target;
@@ -102,12 +108,9 @@ export abstract class AOperation {
       headers['X-MeSomb-TrxID'] = String(body.trxID);
       delete body.trxID;
     }
-    if (body) {
-      body.source = `MeSombJS/v${MeSomb.VERSION}`;
-    }
 
     let authorization: string;
-    if (method === 'POST' && body) {
+    if (method !== 'GET' && body) {
       authorization = this._getAuthorization(
         method,
         endpoint,

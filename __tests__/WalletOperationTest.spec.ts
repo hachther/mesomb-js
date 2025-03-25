@@ -21,7 +21,6 @@ describe("Wallet Operation", () => {
       phoneNumber: '+237677550000',
       country: 'CM',
       gender: 'MAN',
-      nonce: RandomGenerator.nonce(),
     });
     expect(wallet.firstName).toEqual('John');
     expect(wallet.lastName).toEqual('Doe');
@@ -32,9 +31,36 @@ describe("Wallet Operation", () => {
     expect(wallet.number).not.toBeNull();
   });
 
+  it('Should create new wallet with success and minimal', async () => {
+    const client = new WalletOperation({providerKey, accessKey, secretKey});
+    const wallet = await client.createWallet({
+      lastName: 'Doe',
+      phoneNumber: '+237677550000',
+      gender: 'MAN',
+    });
+    expect(wallet.lastName).toEqual('Doe');
+    expect(wallet.phoneNumber).toEqual('+237677550000');
+    expect(wallet.gender).toEqual('MAN');
+    expect(wallet.number).not.toBeNull();
+  });
+
+  it('Should create update wallet with success and minimal', async () => {
+    const client = new WalletOperation({providerKey, accessKey, secretKey});
+    const wallet = await client.updateWallet(229, {
+      lastName: 'Doe',
+      phoneNumber: '+237677550001',
+      gender: 'WOMAN',
+    });
+    expect(wallet.lastName).toEqual('Doe');
+    expect(wallet.phoneNumber).toEqual('+237677550001');
+    expect(wallet.gender).toEqual('WOMAN');
+    expect(wallet.number).not.toBeNull();
+  });
+
   it('Should create get wallet with success', async () => {
     const client = new WalletOperation({providerKey, accessKey, secretKey});
     const wallet = await client.getWallet(228);
+    expect(wallet.id).toEqual(228);
     expect(wallet.firstName).toEqual('John');
     expect(wallet.lastName).toEqual('Doe');
     expect(wallet.email).toEqual('contact@gmail.com')
@@ -46,11 +72,11 @@ describe("Wallet Operation", () => {
 
   it('Should create get paginated wallets with success', async () => {
     const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const wallet = await client.getWallets(1);
-    expect(wallet.count).toBeGreaterThan(0);
+    const wallets = await client.getWallets(1);
+    expect(wallets.count).toBeGreaterThan(0);
     // expect(wallet.next).not.toBeNull();
-    expect(wallet.previous).toBeNull();
-    expect(wallet.results.length).toBeGreaterThan(0);
+    expect(wallets.previous).toBeNull();
+    expect(wallets.results.length).toBeGreaterThan(0);
   });
 
   it('Should add money to wallet', async () => {
@@ -84,6 +110,7 @@ describe("Wallet Operation", () => {
   it('Should get transaction details', async () => {
     const client = new WalletOperation({providerKey, accessKey, secretKey});
     const transaction = await client.getTransaction(3061);
+    expect(transaction.id).not.toBeNull();
     expect(transaction.direction).toEqual(-1);
     expect(transaction.status).toEqual('SUCCESS');
     expect(transaction.amount).toEqual(1000);

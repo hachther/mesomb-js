@@ -1,26 +1,33 @@
+/**
+ * Application model
+ *
+ * @property {string} key - Application key
+ * @property {string} logo - Application logo
+ * @property {Array<{ country: string; service: string; value: number }>} balances - Application balances
+ * @property {string[]} countries - Application countries
+ * @property {string} description - Application description
+ * @property {string} name - Application name
+ * @property {any} security - Application security
+ * @property {string} url - Application url
+ */
 export default class Application {
   public key: string;
   public logo: string;
   private readonly balances: { country: string; service: string; value: number }[];
   public countries: string[];
   public description: string;
-  // tslint:disable-next-line:variable-name
-  public is_live: boolean;
   public name: string;
   public readonly security: any;
-  public status: 'LIVE' | 'PENDING' | 'DEVELOPMENT';
   public url: string;
 
-  public constructor(data: Record<string, any>) {
+  public constructor(data: { key: string; logo: string; balances: { country: string; service: string; value: number }[]; countries: string[]; description: string; name: string; security: any; url: string }) {
     this.key = data.key;
     this.logo = data.logo;
     this.balances = data.balances;
     this.countries = data.countries;
     this.description = data.description;
-    this.is_live = data.is_live;
     this.name = data.name;
     this.security = data.security;
-    this.status = data.status;
     this.url = data.url;
   }
 

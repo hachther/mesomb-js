@@ -49,7 +49,6 @@ describe("Contribution Operation", () => {
       amount: 100,
       service: 'MTN',
       payer: '670000000',
-      nonce: RandomGenerator.nonce(),
       trxID: '1',
       fullName: {firstName: 'John', lastName: 'Doe'},
       contact: {email: 'contact@gmail.com', phoneNumber: '+237677550203'},
@@ -68,7 +67,7 @@ describe("Contribution Operation", () => {
     expect(response.contribution.contributor!.lastName).toEqual('Doe');
     expect(response.contribution.contributor!.email).toEqual('contact@gmail.com');
     expect(response.contribution.contributor!.phone).toEqual('+237677550203');
-    expect(response.contribution.toJSON()).not.toBeNull()
+    expect(response.contribution.getData()).not.toBeNull()
   });
   it('Should make payment test with success without fees', async () => {
     const payment = new FundraisingOperation({fundKey, accessKey, secretKey});

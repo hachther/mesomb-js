@@ -34,68 +34,83 @@ Below some quick examples
 
 ### Collect money from an account
 
-ES6 import
-
 ```JavaScript
 import {PaymentOperation, RandomGenerator} from '@hachther/mesomb';
 
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '677550203', nonce: RandomGenerator.nonce()});
-console.log(response.isOperationSuccess());
-console.log(response.isTransactionSuccess());
-```
+// or Modular import
+// const {PaymentOperation} = require('@hachther/mesomb');
 
-Modular include
+const applicationKey = '<your application key>'
+const accessKey = '<your access key>'
+const secretKey = '<your secret key>'
+const client = new PaymentOperation({applicationKey, accessKey, secretKey});
 
-```JavaScript
-const {PaymentOperation, RandomGenerator} = require('@hachther/mesomb');
-
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '677550203', nonce: RandomGenerator.nonce()});
-console.log(response.isOperationSuccess());
-console.log(response.isTransactionSuccess());
+const response = await client.makeCollect({
+  payer: '670000000',
+  amount: 10000,
+  service: 'MTN',
+  country: 'CM',
+  currency: 'XAF',
+  customer: {
+    email: 'email@gmail.com',
+    firstName: 'Dan',
+    lastName: 'Fisher',
+    town: 'Douala',
+    region: 'Littoral',
+    country: 'CM',
+    address: 'Bepanda',
+  },
+  location: {town: 'Douala', region: 'Littoral', country: 'CM'},
+  products: [
+    {name: 'Sac a Main SM', category: 'Sac a Main', quantity: 1, amount: 10000}
+  ],
+});
 ```
 
 ### Depose money in an account
 
-ES6 import
-
 ```JavaScript
-import {PaymentOperation, RandomGenerator} from '@hachther/mesomb';
+import {PaymentOperation} from '@hachther/mesomb';
 
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '677550203', nonce: RandomGenerator.nonce()});
-console.log(response.isOperationSuccess());
-console.log(response.isTransactionSuccess());
-```
+// Modular import
+// const {PaymentOperation} = require('@hachther/mesomb');
 
-Modular include
+const applicationKey = '<your application key>'
+const accessKey = '<your access key>'
+const secretKey = '<your secret key>'
+const client = new PaymentOperation({applicationKey, accessKey, secretKey});
 
-```JavaScript
-const {PaymentOperation, RandomGenerator} = require('@hachther/mesomb');
+const response = await client.makeDeposit({
+  receiver: '670000000',
+  amount: 10000,
+  service: 'MTN',
+  country: 'CM',
+  currency: 'XAF',
+  customer: {
+    email: 'email@gmail.com',
+    first_name: 'Dan',
+    last_name: 'Fisher',
+    town: 'Douala',
+    region: 'Littoral',
+    country: 'CM',
+    address: 'Bepanda',
+  },
+  location: {town: 'Douala', region: 'Littoral', country: 'CM'},
+  products: [
+    {name: 'Sac a Main SM', category: 'Sac a Main', quantity: 1, 'amount': 10000}
+  ],
+});
 
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '677550203', nonce: RandomGenerator.nonce()});
-console.log(response.isOperationSuccess());
-console.log(response.isTransactionSuccess());
+response.isOperationSuccess()
+response.isTransactionSuccess()
 ```
 
 ### Get application status
 
-ES6 import
-
 ```JavaScript
-import {PaymentOperation, Signature} from '@hachther/mesomb';
-
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const application = await payment.getStatus();
-console.log(application);
-```
-
-Modular include
-
-```JavaScript
-const {PaymentOperation, Signature} = require('@hachther/mesomb');
+import {PaymentOperation} from '@hachther/mesomb';
+// Modular import
+// const {PaymentOperation} = require('@hachther/mesomb');
 
 const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
 const application = await payment.getStatus();
@@ -104,25 +119,21 @@ console.log(application);
 
 ### Get transactions by IDs
 
-ES6 import
-
 ```JavaScript
-import {PaymentOperation, Signature} from '@hachther/mesomb';
+import {PaymentOperation} from '@hachther/mesomb';
+// Modular import
+// const {PaymentOperation} = require('@hachther/mesomb');
 
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const transactions = await payment.getTransactions(['ID1', 'ID2']);
-console.log(transactions);
+const applicationKey = '<your application key>'
+const accessKey = '<your access key>'
+const secretKey = '<your secret key>'
+const client = new PaymentOperation({applicationKey, accessKey, secretKey});
+
+const transactions = await client.getTransactions(['a483a9e8-51d7-44c9-875b-1305b1801274']);
+
+console.log(transactions)
 ```
 
-Modular include
-
-```JavaScript
-const {PaymentOperation, Signature} = require('@hachther/mesomb');
-
-const payment = new PaymentOperation({applicationKey: '<applicationKey>', accessKey: '<AccessKey>', secretKey: '<SecretKey>'});
-const transactions = await payment.getTransactions(['ID1', 'ID2']);
-console.log(transactions);
-```
 
 ## Author
 
