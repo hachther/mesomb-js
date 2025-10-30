@@ -1,6 +1,7 @@
 import MeSomb from '../MeSomb';
 import { Signature } from '../Signature';
 import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions';
+import Settings from '../MeSomb';
 
 export abstract class AOperation {
   /**
@@ -129,14 +130,28 @@ export abstract class AOperation {
     }
     headers.Authorization = authorization;
 
-    const response = await fetch(url, {
-      method,
-      body: body ? JSON.stringify(body) : undefined,
-      headers,
-    });
-    if (response.status >= 400) {
-      await this._processClientException(response);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), Settings.TIMEOUT);
+
+    try {
+      const response = await fetch(url, {
+        method,
+        body: body ? JSON.stringify(body) : undefined,
+        headers,
+        signal: controller.signal,
+      });
+
+      if (response.status >= 400) {
+        await this._processClientException(response);
+      }
+
+      return await response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Request timeout');
+      }
+      throw error;
     }
-    return await response.json()
   }
 }
