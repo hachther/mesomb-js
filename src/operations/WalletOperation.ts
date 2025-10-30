@@ -213,15 +213,29 @@ export class WalletOperation extends AOperation {
   }
 
   /**
-   * Get a transaction
+   * Get a paginated list of transactions
    * @param page of the transaction
    * @param wallet id of the wallet
    */
-  public async getTransactions(page: number, wallet?: number): Promise<PaginatedWalletTransactions> {
+  public async listTransactions(page: number, wallet?: number): Promise<PaginatedWalletTransactions> {
     const endpoint = `wallet/transactions/?page=${page}${wallet ? `&wallet=${wallet}` : ''}`;
 
     return new PaginatedWalletTransactions(
       await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()),
     );
+  }
+
+  /**
+   * Fetch transactions base on MeSomb IDs or external IDs
+   *
+   * @param ids
+   * @param source
+   */
+  public async getTransactions(
+    ids: string[],
+    source: 'MESOMB' | 'EXTERNAL' = 'MESOMB'
+  ): Promise<WalletTransaction[]> {
+    const endpoint = `wallet/transactions/search/?ids=${ids.join(',')}&source=${source}`;
+    return (await this.executeRequest('GET', endpoint, new Date(), '')).map((d: any) => new WalletTransaction(d));
   }
 }

@@ -249,10 +249,10 @@ export default class PaymentOperation extends AOperation {
   /**
    * Fetch transactions base on MeSomb IDs or external IDs
    *
-   * @param ids: ids of the transactions
-   * @param source: origin of the ID of the transactions (MESOMB for MeSomb and EXTERNAL for your system)
    *
    * @return Transaction[]
+   * @param ids
+   * @param source
    */
   public async getTransactions(
     ids: string[],

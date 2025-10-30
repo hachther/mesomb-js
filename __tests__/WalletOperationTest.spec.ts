@@ -123,7 +123,7 @@ describe("Wallet Operation", () => {
 
   it('Should create get paginated transactions with success', async () => {
     const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const transactions = await client.getTransactions(1);
+    const transactions = await client.listTransactions(1);
     expect(transactions.count).toBeGreaterThan(0);
     // expect(wallet.next).not.toBeNull();
     expect(transactions.previous).toBeNull();
@@ -132,10 +132,16 @@ describe("Wallet Operation", () => {
 
   it('Should create get paginated transactions on a wallet with success', async () => {
     const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const transactions = await client.getTransactions(1, 228);
+    const transactions = await client.listTransactions(1, 228);
     expect(transactions.count).toBeGreaterThan(0);
     // expect(wallet.next).not.toBeNull();
     expect(transactions.previous).toBeNull();
     expect(transactions.results.length).toBeGreaterThan(0);
+  });
+
+  it('Should create get list transactions on a wallet with success', async () => {
+    const client = new WalletOperation({providerKey, accessKey, secretKey});
+    const transactions = await client.getTransactions(['620757', '620756']);
+    expect(transactions.length).toBeGreaterThan(0);
   });
 });

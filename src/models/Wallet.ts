@@ -29,7 +29,7 @@ export default class Wallet {
   public gender: 'MAN' | 'WOMAN';
 
   public constructor(data: {
-    identifier: number;
+    id: number;
     status: string;
     first_name: string;
     last_name: string;
@@ -43,7 +43,7 @@ export default class Wallet {
   }) {
     this.data = data;
 
-    this.id = data.identifier;
+    this.id = data.id;
     this.status = data.status;
     this.firstName = data.first_name;
     this.lastName = data.last_name;
