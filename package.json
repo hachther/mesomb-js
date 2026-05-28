@@ -1,6 +1,6 @@
 {
   "name": "@hachther/mesomb",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "JS client for browser to perform mobile payment operation with MeSomb",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -21,7 +21,7 @@
     "Airtel Money",
     "VueJS"
   ],
-  "repository": "https://github.com/hachther/mesomb-browser.git",
+  "repository": "https://github.com/hachther/mesomb-js.git",
   "author": "Hachther LLC <contact@hachther.com>",
   "license": "MIT",
   "private": false,

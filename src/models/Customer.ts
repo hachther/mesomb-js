@@ -1,4 +1,5 @@
 import { CustomerData } from '../types';
+import Address from './Address';
 
 /**
  * Customer model
@@ -23,7 +24,7 @@ export default class Customer {
   public country: string;
   public firstName: string;
   public lastName: string;
-  public address: string;
+  public address?: Address;
 
   public constructor(data: CustomerData) {
     this.data = data;
@@ -35,7 +36,7 @@ export default class Customer {
     this.country = data.country;
     this.firstName = data.first_name;
     this.lastName = data.last_name;
-    this.address = data.address;
+    this.address = !!data.address ? new Address(data.address) : undefined;
   }
 
   /**

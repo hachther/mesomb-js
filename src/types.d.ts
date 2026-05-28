@@ -1,5 +1,3 @@
-import { TransactionResponse } from './models';
-
 /**
  * @interface LocationRequest
  *
@@ -28,6 +26,23 @@ export interface ProductRequest {
   amount?: number;
 }
 
+
+/**
+ * @interface AddressData
+ *
+ * @property {string} line1 - First line of the address
+ * @property {string} town - Town of the address
+ * @property {string} region - Region of the address
+ */
+export interface AddressData {
+  line1: string;
+  town: string;
+  region: string;
+  country: string;
+  line2?: string;
+  zip?: string;
+}
+
 /**
  * @interface CustomerRequest
  *
@@ -38,7 +53,7 @@ export interface ProductRequest {
  * @property {string} [country] - Country of the customer
  * @property {string} [first_name] - First name of the customer
  * @property {string} [last_name] - Last name of the customer
- * @property {string} [address] - Address of the customer
+ * @property {AddressData} [address] - Address of the customer
  */
 export interface CustomerRequest {
   email?: string;
@@ -48,7 +63,7 @@ export interface CustomerRequest {
   country?: string;
   first_name?: string;
   last_name?: string;
-  address?: string;
+  address?: AddressData;
 }
 
 /**
@@ -237,7 +252,16 @@ export interface TransactionData {
   products: ProductData[];
 }
 
-export interface CustomerData {email: string; phone: string; town: string; region: string; country: string; first_name: string; last_name: string; address: string}
+export interface CustomerData {
+  email: string;
+  phone: string;
+  town: string;
+  region: string;
+  country: string;
+  first_name: string;
+  last_name: string;
+  address?: AddressData;
+}
 
 export interface ProductData {id: string; name: string; category?: string; quantity: number; amount: number}
 
