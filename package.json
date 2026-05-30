@@ -1,10 +1,19 @@
 {
   "name": "@hachther/mesomb",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "JS client for browser to perform mobile payment operation with MeSomb",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "browser": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node ./tools/cjs-wrapper.mjs",
     "test": "node --test",
@@ -44,7 +53,6 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
-    "isomorphic-fetch": "^3.0.0",
-    "url-parse": "^1.5.10"
+    "isomorphic-fetch": "^3.0.0"
   }
 }

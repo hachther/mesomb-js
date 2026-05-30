@@ -4,7 +4,7 @@ import MerchantProduct from '../models/MerchantProduct';
 import PaginatedMerchantProducts from '../models/PaginatedMerchantProducts';
 
 export class ProductOperation extends AOperation {
-  protected service = 'api';
+  protected service = 'payment';
 
   public constructor({
     accessKey,
@@ -22,7 +22,9 @@ export class ProductOperation extends AOperation {
 
   public async listProducts(page: number = 1): Promise<PaginatedMerchantProducts> {
     const endpoint = `products/?page=${page}`;
-    return new PaginatedMerchantProducts(await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()));
+    return new PaginatedMerchantProducts(
+      await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()),
+    );
   }
 
   public async createProduct(data: Record<string, any>): Promise<MerchantProduct> {

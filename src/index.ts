@@ -1,4 +1,7 @@
 export { Signature } from './Signature';
+export { CryptoJsSigner } from './signers/CryptoJsSigner';
+export { WebCryptoSigner } from './signers/WebCryptoSigner';
+export type { RequestSigner, SignRequestParams } from './signers/types';
 export { default as PaymentOperation } from './operations/PaymentOperation';
 export { FundraisingOperation } from './operations/FundraisingOperation';
 export { WalletOperation } from './operations/WalletOperation';

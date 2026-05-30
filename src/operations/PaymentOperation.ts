@@ -1,4 +1,4 @@
-import { Application, Transaction, TransactionResponse } from '../models';
+import { Application, Transaction, TransactionResponse } from '../models/index';
 import PaymentAppResponse from '../models/PaymentAppResponse';
 import 'isomorphic-fetch';
 import { AirtimePurchaseRequest, MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest, YangoRefillRequest } from '../types';

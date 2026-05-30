@@ -1,3 +1,15 @@
+# Unreleased
+
+## Added
+- Add CheckoutSession, Product, and Customer management APIs
+- Add pluggable signing engine support via `Signature.setSigner(...)`
+- Add `CryptoJsSigner` and `WebCryptoSigner`
+
+## Changed
+- Refactor signature canonicalization to static imports with native URL-first parsing
+- Update package entrypoints with an explicit `exports` map for `import`/`require`
+- Add framework/runtime compatibility and security guidance in `README.md`
+
 # 2.0.2 (2026-05-27)
 
 ## Updated

@@ -30,6 +30,48 @@ npm install @hachther/mesomb
 
 Check the full documentation [here](docs.md)
 
+## Runtime and framework compatibility
+
+This SDK is compatible with common JavaScript ecosystems (React, React Native, Vue, Next.js, Angular) with the notes below.
+
+| Runtime                   | Status                           | Notes                                                                           |
+|---------------------------|----------------------------------|---------------------------------------------------------------------------------|
+| React (Vite/Webpack)      | Supported                        | Works out of the box in browser bundles.                                        |
+| React Native              | Supported                        | Use the default signer or switch signer explicitly if your runtime requires it. |
+| Vue.js (Vite/Nuxt client) | Supported                        | Works in client apps with bundlers.                                             |
+| Angular                   | Supported                        | Works in browser builds via Angular CLI/Webpack.                                |
+| Next.js (Node runtime)    | Supported                        | Recommended for signed requests.                                                |
+| Next.js Edge runtime      | Supported with Web Crypto signer | Use `WebCryptoSigner` and avoid Node-only APIs.                                 |
+
+### Signature engines
+
+By default, the SDK uses `CryptoJsSigner` for compatibility. You can switch signer globally:
+
+```javascript
+import { Signature, WebCryptoSigner } from '@hachther/mesomb';
+
+// Use Web Crypto where available (Edge runtimes, modern browsers).
+Signature.setSigner(new WebCryptoSigner());
+```
+
+To restore the default implementation:
+
+```javascript
+import { Signature } from '@hachther/mesomb';
+
+Signature.resetSigner();
+```
+
+### Security recommendation for frontend apps
+
+For React, React Native, Vue, Angular, and browser-only Next.js pages:
+
+- Do not ship your MeSomb `secretKey` to client devices.
+- Prefer server-side signing in your backend/API route/serverless function.
+- Let clients call your backend, then your backend calls MeSomb.
+
+This is the safest strategy and avoids secret leakage.
+
 Below some quick examples
 
 ### Collect money from an account

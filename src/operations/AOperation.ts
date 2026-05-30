@@ -1,6 +1,6 @@
 import MeSomb from '../MeSomb';
 import { Signature } from '../Signature';
-import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions';
+import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions/index';
 import Settings from '../MeSomb';
 
 export abstract class AOperation {
@@ -55,19 +55,19 @@ export abstract class AOperation {
     return `${MeSomb.HOST}/api/${MeSomb.APIVERSION}/${endpoint}`;
   }
 
-  protected _getAuthorization(
+  protected async _getAuthorization(
     method: string,
     endpoint: string,
     date: Date,
     nonce: string,
     headers: Record<string, string> = {},
     body?: Record<string, any> | undefined,
-  ): string {
+  ): Promise<string> {
     const url = this._buildUrl(endpoint);
 
     const credentials = { accessKey: this.accessKey, secretKey: this.secretKey };
 
-    return Signature.signRequest(this.service, method, url, date, nonce, credentials, headers, body || {});
+    return await Signature.signRequestAsync(this.service, method, url, date, nonce, credentials, headers, body || {});
   }
 
   private async _processClientException(response: Response) {
@@ -125,7 +125,7 @@ export abstract class AOperation {
 
     let authorization: string;
     if (method !== 'GET' && body) {
-      authorization = this._getAuthorization(
+      authorization = await this._getAuthorization(
         method,
         endpoint,
         date,
@@ -134,7 +134,7 @@ export abstract class AOperation {
         body,
       );
     } else {
-      authorization = this._getAuthorization(
+      authorization = await this._getAuthorization(
         method,
         endpoint,
         date,

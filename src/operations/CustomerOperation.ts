@@ -4,7 +4,7 @@ import MerchantCustomer from '../models/MerchantCustomer';
 import PaginatedMerchantCustomers from '../models/PaginatedMerchantCustomers';
 
 export class CustomerOperation extends AOperation {
-  protected service = 'api';
+  protected service = 'payment';
 
   public constructor({
     accessKey,
@@ -22,7 +22,9 @@ export class CustomerOperation extends AOperation {
 
   public async listCustomers(page: number = 1): Promise<PaginatedMerchantCustomers> {
     const endpoint = `customers/?page=${page}`;
-    return new PaginatedMerchantCustomers(await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()));
+    return new PaginatedMerchantCustomers(
+      await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()),
+    );
   }
 
   public async createCustomer(data: Record<string, any>): Promise<MerchantCustomer> {
@@ -42,7 +44,9 @@ export class CustomerOperation extends AOperation {
 
   public async patchCustomer(id: number, data: Record<string, any>): Promise<MerchantCustomer> {
     const endpoint = `customers/${id}/`;
-    return new MerchantCustomer(await this.executeRequest('PATCH', endpoint, new Date(), RandomGenerator.nonce(), data));
+    return new MerchantCustomer(
+      await this.executeRequest('PATCH', endpoint, new Date(), RandomGenerator.nonce(), data),
+    );
   }
 
   public async deleteCustomer(id: number): Promise<void> {

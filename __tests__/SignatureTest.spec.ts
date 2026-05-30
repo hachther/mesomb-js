@@ -19,4 +19,35 @@ describe("MeSomb Signature", () => {
     expect(signature).toContain('SignedHeaders=host;x-mesomb-date;x-mesomb-nonce');
     expect(signature).toMatch(/Signature=[a-f0-9]{40}$/);
   });
+
+  it('supports async signers through signRequestAsync', async () => {
+    const asyncSigner = {
+      signRequest: jest.fn(async () => 'async-signature'),
+    };
+    Signature.setSigner(asyncSigner as any);
+
+    await expect(
+      Signature.signRequestAsync(
+        'payment',
+        'GET',
+        'https://example.com/api/v1.1/payment/status/',
+        new Date(),
+        'nonce',
+        { accessKey: 'access', secretKey: 'secret' },
+      ),
+    ).resolves.toBe('async-signature');
+
+    expect(() =>
+      Signature.signRequest(
+        'payment',
+        'GET',
+        'https://example.com/api/v1.1/payment/status/',
+        new Date(),
+        'nonce',
+        { accessKey: 'access', secretKey: 'secret' },
+      ),
+    ).toThrow('Current signer is async');
+
+    Signature.resetSigner();
+  });
 })

@@ -2,3 +2,5 @@ node_modules
 .idea
 dist
 publish-npm.sh
+coverage
+openapi.json

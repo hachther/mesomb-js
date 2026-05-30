@@ -170,7 +170,6 @@ describe('PaymentOperation (mocked)', () => {
   });
 
   it('maps AbortError to Request timeout and rethrows unknown fetch errors', async () => {
-    jest.useFakeTimers();
     global.fetch = jest.fn((_, init?: RequestInit) => {
       return new Promise((_, reject) => {
         init?.signal?.addEventListener('abort', () => {
@@ -181,11 +180,8 @@ describe('PaymentOperation (mocked)', () => {
       });
     }) as any;
 
-    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey, timeout: 10 });
-    const pending = payment.getStatus();
-    jest.advanceTimersByTime(20);
-    await expect(pending).rejects.toThrow('Request timeout');
-    jest.useRealTimers();
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey, timeout: 1 });
+    await expect(payment.getStatus()).rejects.toThrow('Request timeout');
 
     const unknownError = new Error('network down');
     global.fetch = jest.fn(async () => Promise.reject(unknownError)) as any;

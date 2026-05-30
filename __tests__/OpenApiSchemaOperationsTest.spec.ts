@@ -199,7 +199,6 @@ describe('OpenAPI schema aligned operations', () => {
   });
 
   it('aborts requests when the configured timeout elapses', async () => {
-    jest.useFakeTimers();
     global.fetch = jest.fn((_, init?: RequestInit) => {
       return new Promise((_, reject) => {
         init?.signal?.addEventListener('abort', () => {
@@ -210,12 +209,8 @@ describe('OpenAPI schema aligned operations', () => {
       });
     }) as any;
 
-    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey, timeout: 25 });
-    const request = payment.getStatus();
-
-    jest.advanceTimersByTime(30);
-    await expect(request).rejects.toThrow('Request timeout');
-    jest.useRealTimers();
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey, timeout: 1 });
+    await expect(payment.getStatus()).rejects.toThrow('Request timeout');
   });
 
   it('treats 204 responses as empty delete results', async () => {
