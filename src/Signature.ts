@@ -1,6 +1,6 @@
 import MeSomb from './MeSomb';
-import { CryptoJsSigner } from './signers';
-import { RequestSigner } from './signers';
+import { CryptoJsSigner } from './signers/CryptoJsSigner';
+import { RequestSigner } from './signers/types';
 
 export class Signature {
   private static signer: RequestSigner = new CryptoJsSigner();

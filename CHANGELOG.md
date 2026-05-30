@@ -1,4 +1,4 @@
-# Unreleased
+# 3.0.0 (2026-05-30)
 
 ## Added
 - Add CheckoutSession, Product, and Customer management APIs
@@ -13,7 +13,7 @@
 # 2.0.2 (2026-05-27)
 
 ## Updated
-- Update data structure of address in customer 
+- Update the data structure of an address in customer 
 
 # 2.0.1 (2025-10-30)
 
