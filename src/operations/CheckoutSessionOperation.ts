@@ -21,7 +21,7 @@ export class CheckoutSessionOperation extends AOperation {
     super({ target: applicationKey, accessKey, secretKey, language, timeout });
   }
 
-  public async createSession(data: Record<string, any>): Promise<CheckoutSession> {
+  public async create(data: Record<string, any>): Promise<CheckoutSession> {
     const endpoint = 'checkout/sessions/';
     const nonce = data.nonce ?? RandomGenerator.nonce();
     const { nonce: _nonce, ...body } = data;
@@ -29,17 +29,17 @@ export class CheckoutSessionOperation extends AOperation {
     return new CheckoutSession(await this.executeRequest('POST', endpoint, new Date(), nonce, body));
   }
 
-  public async getSession(id: string): Promise<CheckoutSession> {
+  public async retrieve(id: string): Promise<CheckoutSession> {
     const endpoint = `checkout/sessions/${id}/`;
     return new CheckoutSession(await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()));
   }
 
-  public async expireSession(id: string): Promise<CheckoutSession> {
+  public async expire(id: string): Promise<CheckoutSession> {
     const endpoint = `checkout/sessions/${id}/expire/`;
     return new CheckoutSession(await this.executeRequest('PATCH', endpoint, new Date(), RandomGenerator.nonce()));
   }
 
-  public async deleteSession(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     const endpoint = `checkout/sessions/${id}/`;
     await this.executeRequest('DELETE', endpoint, new Date(), RandomGenerator.nonce());
   }

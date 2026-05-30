@@ -20,36 +20,36 @@ export class CustomerOperation extends AOperation {
     super({ target: '', accessKey, secretKey, language, timeout });
   }
 
-  public async listCustomers(page: number = 1): Promise<PaginatedMerchantCustomers> {
+  public async list(page: number = 1): Promise<PaginatedMerchantCustomers> {
     const endpoint = `customers/?page=${page}`;
     return new PaginatedMerchantCustomers(
       await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()),
     );
   }
 
-  public async createCustomer(data: Record<string, any>): Promise<MerchantCustomer> {
+  public async create(data: Record<string, any>): Promise<MerchantCustomer> {
     const endpoint = 'customers/';
     return new MerchantCustomer(await this.executeRequest('POST', endpoint, new Date(), RandomGenerator.nonce(), data));
   }
 
-  public async getCustomer(id: number): Promise<MerchantCustomer> {
+  public async retrieve(id: number): Promise<MerchantCustomer> {
     const endpoint = `customers/${id}/`;
     return new MerchantCustomer(await this.executeRequest('GET', endpoint, new Date(), RandomGenerator.nonce()));
   }
 
-  public async updateCustomer(id: number, data: Record<string, any>): Promise<MerchantCustomer> {
+  public async update(id: number, data: Record<string, any>): Promise<MerchantCustomer> {
     const endpoint = `customers/${id}/`;
     return new MerchantCustomer(await this.executeRequest('PUT', endpoint, new Date(), RandomGenerator.nonce(), data));
   }
 
-  public async patchCustomer(id: number, data: Record<string, any>): Promise<MerchantCustomer> {
+  public async patch(id: number, data: Record<string, any>): Promise<MerchantCustomer> {
     const endpoint = `customers/${id}/`;
     return new MerchantCustomer(
       await this.executeRequest('PATCH', endpoint, new Date(), RandomGenerator.nonce(), data),
     );
   }
 
-  public async deleteCustomer(id: number): Promise<void> {
+  public async delete(id: number): Promise<void> {
     const endpoint = `customers/${id}/`;
     await this.executeRequest('DELETE', endpoint, new Date(), RandomGenerator.nonce());
   }

@@ -68,7 +68,7 @@ describe('OpenAPI schema aligned operations', () => {
     global.fetch = fetchMock as any;
 
     const checkout = new CheckoutSessionOperation({ applicationKey, accessKey, secretKey });
-    const session = await checkout.createSession({
+    const session = await checkout.create({
       amount: 2500,
       success_url: 'https://example.com/success',
       cancel_url: 'https://example.com/cancel',
@@ -83,12 +83,12 @@ describe('OpenAPI schema aligned operations', () => {
     expect(session.customer?.firstName).toBe('Jane');
 
     fetchMock.mockResolvedValueOnce(mockResponse(201, sessionPayload));
-    const retrieved = await checkout.getSession('cs_test_1');
+    const retrieved = await checkout.retrieve('cs_test_1');
     expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://example.com/api/v1.1/checkout/sessions/cs_test_1/', expect.any(Object));
     expect(retrieved.id).toBe('cs_test_1');
 
     fetchMock.mockResolvedValueOnce(mockResponse(200, { ...sessionPayload, status: 'expired' }));
-    const expired = await checkout.expireSession('cs_test_1');
+    const expired = await checkout.expire('cs_test_1');
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,
       'https://example.com/api/v1.1/checkout/sessions/cs_test_1/expire/',
@@ -147,54 +147,54 @@ describe('OpenAPI schema aligned operations', () => {
     global.fetch = fetchMock as any;
 
     const customers = new CustomerOperation({ accessKey, secretKey });
-    const customerList = await customers.listCustomers(1);
+    const customerList = await customers.list(1);
     expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/api/v1.1/customers/?page=1', expect.any(Object));
     expect(customerList.count).toBe(1);
     expect(customerList.results[0].identifier).toBe('cus_1');
 
-    const createdCustomer = await customers.createCustomer(customerPayload);
+    const createdCustomer = await customers.create(customerPayload);
     expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://example.com/api/v1.1/customers/', expect.any(Object));
     expect(createdCustomer.identifier).toBe('cus_1');
     expect(createdCustomer.email).toBe('buyer@example.com');
 
-    const customer = await customers.getCustomer(1);
+    const customer = await customers.retrieve(1);
     expect(fetchMock).toHaveBeenNthCalledWith(3, 'https://example.com/api/v1.1/customers/1/', expect.any(Object));
     expect(customer.firstName).toBe('Jane');
 
-    const updatedCustomer = await customers.updateCustomer(1, { ...customerPayload, first_name: 'Janet' });
+    const updatedCustomer = await customers.update(1, { ...customerPayload, first_name: 'Janet' });
     expect(fetchMock).toHaveBeenNthCalledWith(4, 'https://example.com/api/v1.1/customers/1/', expect.any(Object));
     expect(updatedCustomer.firstName).toBe('Janet');
 
-    const patchedCustomer = await customers.patchCustomer(1, { first_name: 'Janet' });
+    const patchedCustomer = await customers.patch(1, { first_name: 'Janet' });
     expect(fetchMock).toHaveBeenNthCalledWith(5, 'https://example.com/api/v1.1/customers/1/', expect.any(Object));
     expect(patchedCustomer.firstName).toBe('Janet');
 
-    await expect(customers.deleteCustomer(1)).resolves.toBeUndefined();
+    await expect(customers.delete(1)).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenNthCalledWith(6, 'https://example.com/api/v1.1/customers/1/', expect.any(Object));
 
     const products = new ProductOperation({ accessKey, secretKey });
-    const productList = await products.listProducts(1);
+    const productList = await products.list(1);
     expect(fetchMock).toHaveBeenNthCalledWith(7, 'https://example.com/api/v1.1/products/?page=1', expect.any(Object));
     expect(productList.results[0].id).toBe('prd_1');
 
-    const createdProduct = await products.createProduct({ name: 'T-Shirt', category: 'Apparel' });
+    const createdProduct = await products.create({ name: 'T-Shirt', category: 'Apparel' });
     expect(fetchMock).toHaveBeenNthCalledWith(8, 'https://example.com/api/v1.1/products/', expect.any(Object));
     expect(createdProduct.id).toBe('prd_1');
     expect(createdProduct.name).toBe('T-Shirt');
 
-    const product = await products.getProduct('prd_1');
+    const product = await products.retrieve('prd_1');
     expect(fetchMock).toHaveBeenNthCalledWith(9, 'https://example.com/api/v1.1/products/prd_1/', expect.any(Object));
     expect(product.id).toBe('prd_1');
 
-    const updatedProduct = await products.updateProduct('prd_1', { name: 'T-Shirt v2' });
+    const updatedProduct = await products.update('prd_1', { name: 'T-Shirt v2' });
     expect(fetchMock).toHaveBeenNthCalledWith(10, 'https://example.com/api/v1.1/products/prd_1/', expect.any(Object));
     expect(updatedProduct.name).toBe('T-Shirt v2');
 
-    const patchedProduct = await products.patchProduct('prd_1', { name: 'T-Shirt v2' });
+    const patchedProduct = await products.patch('prd_1', { name: 'T-Shirt v2' });
     expect(fetchMock).toHaveBeenNthCalledWith(11, 'https://example.com/api/v1.1/products/prd_1/', expect.any(Object));
     expect(patchedProduct.name).toBe('T-Shirt v2');
 
-    await expect(products.deleteProduct('prd_1')).resolves.toBeUndefined();
+    await expect(products.delete('prd_1')).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenNthCalledWith(12, 'https://example.com/api/v1.1/products/prd_1/', expect.any(Object));
   });
 
@@ -218,7 +218,7 @@ describe('OpenAPI schema aligned operations', () => {
     global.fetch = fetchMock as any;
 
     const checkout = new CheckoutSessionOperation({ applicationKey, accessKey, secretKey });
-    await expect(checkout.deleteSession('cs_test_1')).resolves.toBeUndefined();
+    await expect(checkout.delete('cs_test_1')).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/api/v1.1/checkout/sessions/cs_test_1/', expect.any(Object));
   });
 });
