@@ -14,13 +14,15 @@ export class WalletOperation extends AOperation {
     accessKey,
     secretKey,
     language = 'en',
+    timeout,
   }: {
     providerKey: string;
     accessKey: string;
     secretKey: string;
     language?: string;
+    timeout?: number;
   }) {
-    super({ target: providerKey, accessKey, secretKey, language });
+    super({ target: providerKey, accessKey, secretKey, language, timeout });
   }
 
   /**

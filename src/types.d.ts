@@ -9,6 +9,7 @@ export interface LocationRequest {
   town: string;
   region?: string;
   country?: string;
+  ip?: string;
 }
 
 /**
@@ -64,6 +65,8 @@ export interface CustomerRequest {
   first_name?: string;
   last_name?: string;
   address?: AddressData;
+  metadata?: Record<string, any>;
+  description?: string;
 }
 
 /**
@@ -207,6 +210,90 @@ export interface MoneyContributeRequest extends OnlinePaymentRequest {
   fullName?: FullName;
   anonymous?: boolean;
   acceptTerms?: boolean;
+}
+
+export interface CheckoutLineItemProductData {
+  name: string;
+  description?: string;
+  metadata?: Record<string, any>;
+  images?: string[];
+  unit_label?: string;
+}
+
+export interface CheckoutLineItemRequest {
+  currency?: string;
+  quantity?: number;
+  unit_amount?: number;
+  product?: string;
+  product_data?: CheckoutLineItemProductData;
+  limit_min?: number;
+  limit_max?: number;
+  adjustable?: boolean;
+}
+
+export interface CreateCheckoutSessionRequest {
+  amount: number | string;
+  success_url: string;
+  cancel_url: string;
+  branding_settings?: Record<string, any>;
+  consent_collection?: Record<string, any>;
+  custom_fields?: Record<string, any>[];
+  required_contact_info?: boolean;
+  conversion?: boolean;
+  line_items?: CheckoutLineItemRequest[];
+  custom_text?: Record<string, any>;
+  discounts?: Record<string, any>;
+  call_to_action?: string;
+  mode?: string;
+  currency?: string;
+  description?: string;
+  client_reference_id?: string;
+  expires_in?: number;
+  customer_id?: string;
+  customer?: CustomerRequest;
+  location?: LocationRequest;
+  fees_included?: boolean;
+  secure_pay?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface MerchantCustomerRequest {
+  email?: string | null;
+  phone?: string | null;
+  town?: string | null;
+  region?: string | null;
+  country?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  address?: AddressData;
+  metadata?: Record<string, any>;
+  description?: string | null;
+}
+
+export interface PatchedMerchantCustomerRequest extends Partial<MerchantCustomerRequest> {}
+
+export interface MerchantProductRequest {
+  name: string;
+  category?: string | null;
+  description?: string | null;
+  images?: number[];
+  image_urls_input?: string[];
+  default_price?: string | number | null;
+  price_type?: 'OneTime' | 'Recurring';
+  currency?: string;
+}
+
+export interface PatchedMerchantProductRequest extends Partial<MerchantProductRequest> {}
+
+export interface YangoRefillRequest extends OnlinePaymentRequest {
+  payer: string;
+  driver_id: string;
+  reference?: string;
+  redirect?: string | null;
+  customer?: CustomerRequest;
+  location?: LocationRequest;
+  line_items?: CheckoutLineItemRequest[];
+  channel?: 'API' | 'SMS' | 'USSD' | 'WEB' | 'APP' | 'SMS_API' | 'SANDBOX' | 'SYSTEM' | 'MANUAL' | 'MESOMB';
 }
 
 /**

@@ -1,147 +1,131 @@
-import { FundraisingOperation, RandomGenerator, MeSomb } from '../src';
+import MeSomb from '../src/MeSomb';
 import { WalletOperation } from '../src/operations/WalletOperation';
 
-const providerKey = 'a1dc7a7391c538788043';
-const accessKey = 'c6c40b76-8119-4e93-81bf-bfb55417b392';
-const secretKey = 'fe8c2445-810f-4caa-95c9-778d51580163';
+const providerKey = 'provider-key';
+const accessKey = 'access-key';
+const secretKey = 'secret-key';
 
-jest.setTimeout(30000);
+const walletPayload = {
+  id: 228,
+  status: 'ACTIVE',
+  first_name: 'John',
+  last_name: 'Doe',
+  email: 'contact@gmail.com',
+  phone_number: '+237677550000',
+  country: 'CM',
+  gender: 'MAN',
+  number: '10001',
+  last_activity: '2026-05-29T10:00:00.000Z',
+  balance: 3000,
+};
 
-describe("Wallet Operation", () => {
+const walletTxPayload = {
+  id: 3061,
+  status: 'SUCCESS',
+  type: 'ADJUSTMENT',
+  amount: 1000,
+  direction: 1,
+  wallet: '228',
+  balance_after: 4000,
+  ts: '2026-05-29T10:00:00.000Z',
+  country: 'CM',
+  fin_trx_id: 'fin-100',
+};
+
+const mockResponse = (status: number, data?: any) => ({
+  status,
+  json: jest.fn(async () => data),
+  text: jest.fn(async () => (typeof data === 'string' ? data : JSON.stringify(data ?? {}))),
+});
+
+describe('WalletOperation (mocked)', () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
-
-  it('Should create new wallet with success', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const wallet = await client.createWallet({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'contact@gmail.com',
-      phoneNumber: '+237677550000',
-      country: 'CM',
-      gender: 'MAN',
-    });
-    expect(wallet.firstName).toEqual('John');
-    expect(wallet.lastName).toEqual('Doe');
-    expect(wallet.email).toEqual('contact@gmail.com')
-    expect(wallet.phoneNumber).toEqual('+237677550000');
-    expect(wallet.country).toEqual('CM');
-    expect(wallet.gender).toEqual('MAN');
-    expect(wallet.number).not.toBeNull();
+    MeSomb.HOST = 'https://example.com';
+    jest.restoreAllMocks();
   });
 
-  it('Should create new wallet with success and minimal', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const wallet = await client.createWallet({
-      lastName: 'Doe',
-      phoneNumber: '+237677550000',
-      gender: 'MAN',
-    });
-    expect(wallet.lastName).toEqual('Doe');
-    expect(wallet.phoneNumber).toEqual('+237677550000');
-    expect(wallet.gender).toEqual('MAN');
-    expect(wallet.number).not.toBeNull();
-  });
+  it('covers wallet CRUD endpoints', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(201, walletPayload))
+      .mockResolvedValueOnce(mockResponse(200, walletPayload))
+      .mockResolvedValueOnce(mockResponse(200, { ...walletPayload, last_name: 'Doe 2' }))
+      .mockResolvedValueOnce(mockResponse(204));
+    global.fetch = fetchMock as any;
 
-  it('Should create update wallet with success and minimal', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const wallet = await client.updateWallet(229, {
-      lastName: 'Doe',
-      phoneNumber: '+237677550001',
-      gender: 'WOMAN',
-    });
-    expect(wallet.lastName).toEqual('Doe');
-    expect(wallet.phoneNumber).toEqual('+237677550001');
-    expect(wallet.gender).toEqual('WOMAN');
-    expect(wallet.number).not.toBeNull();
-  });
-
-  it('Should create get wallet with success', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
+    const client = new WalletOperation({ providerKey, accessKey, secretKey });
+    const created = await client.createWallet({ lastName: 'Doe', phoneNumber: '+237677550000', gender: 'MAN' });
     const wallet = await client.getWallet(228);
-    expect(wallet.id).toEqual(228);
-    expect(wallet.firstName).toEqual('John');
-    expect(wallet.lastName).toEqual('Doe');
-    expect(wallet.email).toEqual('contact@gmail.com')
-    expect(wallet.phoneNumber).toEqual('+237677550000');
-    expect(wallet.country).toEqual('CM');
-    expect(wallet.gender).toEqual('MAN');
-    expect(wallet.number).not.toBeNull();
+    const updated = await client.updateWallet(228, { lastName: 'Doe 2', phoneNumber: '+237677550000', gender: 'MAN' });
+    await expect(client.deleteWallet(228)).resolves.toBeUndefined();
+
+    expect(created.number).toBe('10001');
+    expect(wallet.id).toBe(228);
+    expect(updated.lastName).toBe('Doe 2');
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/api/v1.1/wallet/wallets/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://example.com/api/v1.1/wallet/wallets/228/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(3, 'https://example.com/api/v1.1/wallet/wallets/228/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(4, 'https://example.com/api/v1.1/wallet/wallets/228/', expect.any(Object));
   });
 
-  it('Should create get paginated wallets with success', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
+  it('covers money adjustment and transfer endpoints', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(200, walletTxPayload))
+      .mockResolvedValueOnce(mockResponse(200, { ...walletTxPayload, direction: -1, balance_after: 2000 }))
+      .mockResolvedValueOnce(mockResponse(200, walletTxPayload));
+    global.fetch = fetchMock as any;
+
+    const client = new WalletOperation({ providerKey, accessKey, secretKey });
+    const add = await client.addMoney(228, 1000);
+    const remove = await client.removeMoney(228, 1000, true);
+    const transfer = await client.transferMoney(228, 229, 500, true);
+
+    expect(add.direction).toBe(1);
+    expect(remove.direction).toBe(-1);
+    expect(transfer.wallet).toBe('228');
+
+    const addBody = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    const removeBody = JSON.parse(fetchMock.mock.calls[1][1].body as string);
+    const transferBody = JSON.parse(fetchMock.mock.calls[2][1].body as string);
+    expect(addBody.direction).toBe(1);
+    expect(removeBody.force).toBe(true);
+    expect(transferBody.to).toBe(229);
+  });
+
+  it('covers wallet and transaction listing endpoints', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(200, { count: 1, next: null, previous: null, results: [walletPayload] }))
+      .mockResolvedValueOnce(mockResponse(200, walletTxPayload))
+      .mockResolvedValueOnce(mockResponse(200, { count: 1, next: null, previous: null, results: [walletTxPayload] }))
+      .mockResolvedValueOnce(mockResponse(200, { count: 1, next: null, previous: null, results: [walletTxPayload] }))
+      .mockResolvedValueOnce(mockResponse(200, [walletTxPayload]));
+    global.fetch = fetchMock as any;
+
+    const client = new WalletOperation({ providerKey, accessKey, secretKey });
     const wallets = await client.getWallets(1);
-    expect(wallets.count).toBeGreaterThan(0);
-    // expect(wallet.next).not.toBeNull();
-    expect(wallets.previous).toBeNull();
-    expect(wallets.results.length).toBeGreaterThan(0);
+    const tx = await client.getTransaction(3061);
+    const page1 = await client.listTransactions(1);
+    const pageByWallet = await client.listTransactions(1, 228);
+    const search = await client.getTransactions(['620757', '620756'], 'EXTERNAL');
+
+    expect(wallets.count).toBe(1);
+    expect(tx.finTrxId).toBe('fin-100');
+    expect(page1.results[0].id).toBe(3061);
+    expect(pageByWallet.results[0].wallet).toBe('228');
+    expect(search[0].status).toBe('SUCCESS');
+    expect(fetchMock).toHaveBeenNthCalledWith(4, 'https://example.com/api/v1.1/wallet/transactions/?page=1&wallet=228', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      5,
+      'https://example.com/api/v1.1/wallet/transactions/search/?ids=620757,620756&source=EXTERNAL',
+      expect.any(Object),
+    );
   });
 
-  it('Should add money to wallet', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const wallet = await client.getWallet(228);
-    const transaction = await client.addMoney(228, 1000);
-    expect(transaction.direction).toEqual(1);
-    expect(transaction.status).toEqual('SUCCESS');
-    expect(transaction.amount).toEqual(1000);
-    expect(transaction.balanceAfter).toEqual((wallet.balance ?? 0) + 1000);
-    expect(transaction.wallet).toEqual(228);
-    expect(transaction.country).toEqual('CM');
-    expect(transaction.finTrxId).not.toBeNull();
-    expect(transaction.date).not.toBeNull();
-  });
-
-  it('Should remove money to wallet', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const wallet = await client.getWallet(228);
-    const transaction = await client.removeMoney(228, 1000);
-    expect(transaction.direction).toEqual(-1);
-    expect(transaction.status).toEqual('SUCCESS');
-    expect(transaction.amount).toEqual(1000);
-    expect(transaction.balanceAfter).toEqual((wallet.balance ?? 0) - 1000);
-    expect(transaction.wallet).toEqual(228);
-    expect(transaction.country).toEqual('CM');
-    expect(transaction.finTrxId).not.toBeNull();
-    expect(transaction.date).not.toBeNull();
-  });
-
-  it('Should get transaction details', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const transaction = await client.getTransaction(3061);
-    expect(transaction.id).not.toBeNull();
-    expect(transaction.direction).toEqual(-1);
-    expect(transaction.status).toEqual('SUCCESS');
-    expect(transaction.amount).toEqual(1000);
-    expect(transaction.balanceAfter).toEqual(1000);
-    expect(transaction.wallet).toEqual(228);
-    expect(transaction.country).toEqual('CM');
-    expect(transaction.finTrxId).not.toBeNull();
-    expect(transaction.date).not.toBeNull();
-  });
-
-  it('Should create get paginated transactions with success', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const transactions = await client.listTransactions(1);
-    expect(transactions.count).toBeGreaterThan(0);
-    // expect(wallet.next).not.toBeNull();
-    expect(transactions.previous).toBeNull();
-    expect(transactions.results.length).toBeGreaterThan(0);
-  });
-
-  it('Should create get paginated transactions on a wallet with success', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const transactions = await client.listTransactions(1, 228);
-    expect(transactions.count).toBeGreaterThan(0);
-    // expect(wallet.next).not.toBeNull();
-    expect(transactions.previous).toBeNull();
-    expect(transactions.results.length).toBeGreaterThan(0);
-  });
-
-  it('Should create get list transactions on a wallet with success', async () => {
-    const client = new WalletOperation({providerKey, accessKey, secretKey});
-    const transactions = await client.getTransactions(['620757', '620756']);
-    expect(transactions.length).toBeGreaterThan(0);
+  it('maps access errors to PermissionDeniedError', async () => {
+    global.fetch = jest.fn(async () => mockResponse(403, 'forbidden')) as any;
+    const client = new WalletOperation({ providerKey, accessKey, secretKey });
+    await expect(client.getWallet(228)).rejects.toHaveProperty('name', 'PermissionDeniedError');
   });
 });

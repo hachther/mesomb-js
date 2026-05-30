@@ -27,6 +27,8 @@ export abstract class AOperation {
 
   protected readonly language: string;
 
+  protected readonly timeout: number;
+
   protected service!: string;
 
   public constructor({
@@ -34,16 +36,19 @@ export abstract class AOperation {
     accessKey,
     secretKey,
     language = 'en',
+    timeout = Settings.TIMEOUT,
   }: {
     target: string;
     accessKey: string;
     secretKey: string;
     language?: string;
+    timeout?: number;
   }) {
     this.target = target;
     this.accessKey = accessKey;
     this.secretKey = secretKey;
     this.language = language;
+    this.timeout = timeout;
   }
 
   protected _buildUrl(endpoint: string): string {
@@ -86,7 +91,15 @@ export abstract class AOperation {
     }
   }
 
-  protected async executeRequest(method: string, endpoint: string, date: Date, nonce: string, body: Record<string, any> | null = null, mode: string = 'asynchronous') {
+  protected async executeRequest(
+    method: string,
+    endpoint: string,
+    date: Date,
+    nonce: string,
+    body: Record<string, any> | null = null,
+    mode: string = 'asynchronous',
+    timeout: number = this.timeout,
+  ) {
     const url = this._buildUrl(endpoint);
     const headers: Record<string, string> = {
       'x-mesomb-date': String(date.getTime()),
@@ -131,7 +144,7 @@ export abstract class AOperation {
     headers.Authorization = authorization;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), Settings.TIMEOUT);
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
       const response = await fetch(url, {
@@ -145,13 +158,18 @@ export abstract class AOperation {
         await this._processClientException(response);
       }
 
+      if (response.status === 204) {
+        return null;
+      }
+
       return await response.json();
     } catch (error) {
-      clearTimeout(timeoutId);
       if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 }

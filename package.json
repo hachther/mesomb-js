@@ -6,7 +6,9 @@
   "module": "dist/index.js",
   "browser": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.build.json && node ./tools/cjs-wrapper.mjs",
+    "test": "node --test",
+    "clean": "rm -rf dist"
   },
   "files": [
     "dist"

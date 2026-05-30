@@ -1,358 +1,194 @@
-import { PaymentOperation, RandomGenerator, MeSomb } from '../src';
+import MeSomb from '../src/MeSomb';
+import PaymentOperation from '../src/operations/PaymentOperation';
 
-const applicationKey = '2bb525516ff374bb52545bf22ae4da7d655ba9fd';
-const accessKey = 'c6c40b76-8119-4e93-81bf-bfb55417b392';
-const secretKey = 'fe8c2445-810f-4caa-95c9-778d51580163';
+const applicationKey = 'app-key';
+const accessKey = 'access-key';
+const secretKey = 'secret-key';
 
-jest.setTimeout(30000);
+const baseTransaction = {
+  pk: 'trx-1',
+  status: 'SUCCESS',
+  type: 'COLLECT',
+  amount: 100,
+  fees: 2,
+  b_party: '237670000000',
+  message: 'ok',
+  service: 'MTN',
+  reference: 'ref-1',
+  ts: '2026-05-29T10:00:00.000Z',
+  country: 'CM',
+  currency: 'XAF',
+  fin_trx_id: 'fin-1',
+};
 
-describe("Deposit Operation", () => {
-  beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
-  it('Should make deposit test with not service found',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
-      const nonce = 'lkakdio90fsd8fsf';
-
-      const r = await payment.makeDeposit({amount: 5, service: 'MTN', receiver: '670000000', nonce, trxID: 1});
-    } catch (e: any) {
-      expect(e.name).toEqual('ServiceNotFoundError');
-    }
-  });
-  it('Should make deposit test with not permission denied',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
-      const nonce = 'lkakdio90fsd8fsf';
-
-      await payment.makeDeposit({amount: 5, service: 'MTN', receiver: '670000000', nonce, trxID: 1});
-    } catch (e: any) {
-      expect(e.name).toEqual('PermissionDeniedError');
-    }
-  });
-  it('Should make deposit test with invalid amount',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-      const nonce = 'lkakdio90fsd8fsf';
-
-      await payment.makeDeposit({amount: 5, service: 'MTN', receiver: '670000000', nonce, trxID: 1});
-    } catch (e: any) {
-      expect(e.name).toEqual('InvalidClientRequestError');
-    }
-  });
-  it('Should make deposit test with success', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.makeDeposit({amount: 100, service: 'MTN', receiver: '670000000', nonce: RandomGenerator.nonce(), trxID: 1});
-    expect(response.success).toBeTruthy();
-    expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(100);
-    expect(response.transaction.fees).toEqual(0);
-    expect(response.transaction.service).toEqual('MTN');
-    expect(response.transaction.bParty).toEqual('237670000000');
-    expect(response.transaction.country).toEqual('CM');
-    expect(response.transaction.currency).toEqual('XAF');
-  });
-  it('Should make deposit test with success with customer and product data', async () => {
-    const customer = {
-      phone: '+237677550439',
-      email: 'fisher.bank@gmail.com',
-      first_name: 'Fisher',
-      last_name: 'BANK'
-    }
-    const location = {town: 'Douala', country: 'Cameroun'};
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.makeDeposit({
-      amount: 100,
-      service: 'MTN',
-      receiver: '670000000',
-      nonce: RandomGenerator.nonce(),
-      trxID: 1,
-      customer,
-      products: [{name: 'Sac a Dos', category: 'Sac'}],
-      location
-    });
-    expect(response.success).toBeTruthy();
-    expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(100);
-    expect(response.transaction.fees).toEqual(0);
-    expect(response.transaction.service).toEqual('MTN');
-    expect(response.transaction.bParty).toEqual('237670000000');
-    expect(response.transaction.country).toEqual('CM');
-    expect(response.transaction.currency).toEqual('XAF');
-    Object.keys(customer).forEach((key: string) => {
-      // @ts-ignore
-      expect(response.transaction.customer[key]).toEqual(customer[key]);
-    })
-    Object.keys(location).forEach((key: string) => {
-      // @ts-ignore
-      expect(response.transaction.location[key]).toEqual(location[key]);
-    })
-    expect(response.transaction.products?.length).toEqual(1);
-    // @ts-ignore
-    expect(response.transaction.products[0].name).toEqual('Sac a Dos');
-    // @ts-ignore
-    expect(response.transaction.products[0].category).toEqual('Sac');
-    // @ts-ignore
-    // expect(response.transaction.products[0].quantity).toEqual(1);
-    // @ts-ignore
-    // expect(response.transaction.products[0].amount).toEqual(100);
-  });
+const mockResponse = (status: number, data?: any) => ({
+  status,
+  json: jest.fn(async () => data),
+  text: jest.fn(async () => (typeof data === 'string' ? data : JSON.stringify(data ?? {}))),
 });
 
-describe("Airtime Purchase", () => {
+describe('PaymentOperation (mocked)', () => {
   beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
-  it('Should purchase airtime test with success', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.purchaseAirtime({amount: 100, service: 'MTN', receiver: '670000000', merchant: 'MTN', nonce: RandomGenerator.nonce(), trxID: 1});
-    expect(response.success).toBeTruthy();
-    expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(100);
-    expect(response.transaction.fees).toEqual(0);
-    expect(response.transaction.service).toEqual('MTN');
-    expect(response.transaction.bParty).toEqual('237670000000');
-    expect(response.transaction.country).toEqual('CM');
-    expect(response.transaction.currency).toEqual('XAF');
+    MeSomb.HOST = 'https://example.com';
+    jest.restoreAllMocks();
   });
-});
 
-describe("Collect Operation", () => {
-  beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
-  it('Should make payment test with not service found',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
-      const nonce = 'lkakdio90fsd8fsf';
+  it('builds collect request with trx header and maps response model', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(200, {
+        success: true,
+        message: 'ok',
+        redirect: '',
+        status: 'SUCCESS',
+        reference: 'ref-1',
+        transaction: {
+          ...baseTransaction,
+          customer: { email: 'buyer@example.com', phone: '+237677550000', first_name: 'Jane', last_name: 'Doe' },
+          products: [{ id: 'p1', name: 'Bag', category: 'Fashion', quantity: 1, amount: 100 }],
+        },
+      }));
+    global.fetch = fetchMock as any;
 
-      await payment.makeCollect({amount: 5, service: 'MTN', payer: '670000000', nonce});
-    } catch (e: any) {
-      expect(e.name).toEqual('ServiceNotFoundError');
-    }
-  });
-  it('Should make payment test with not permission denied',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
-      const nonce = 'lkakdio90fsd8fsf';
-
-      await payment.makeCollect({amount: 5, service: 'MTN', payer: '670000000', nonce});
-    } catch (e: any) {
-      expect(e.name).toEqual('PermissionDeniedError');
-    }
-  });
-  it('Should make payment test with invalid amount',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-      const nonce = 'lkakdio90fsd8fsf';
-
-      await payment.makeCollect({amount: 5, service: 'MTN', payer: '670000000', nonce});
-    } catch (e: any) {
-      expect(e.name).toEqual('InvalidClientRequestError');
-    }
-  });
-  it('Should make payment test with success', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey });
     const response = await payment.makeCollect({
       amount: 100,
       service: 'MTN',
       payer: '670000000',
-      nonce: RandomGenerator.nonce(),
-      trxID: '1'
+      trxID: 'external-1',
+      customer: { email: 'buyer@example.com' },
+      products: { name: 'Bag', category: 'Fashion' } as any,
+      extra: { note: 'hello' },
+      nonce: 'nonce-1',
     });
-    expect(response.success).toBeTruthy();
-    expect(response.status).toEqual('SUCCESS');
-    expect(response.isTransactionSuccess()).toBeTruthy();
-    expect(response.transaction.amount).toEqual(98);
-    expect(response.transaction.fees).toEqual(2);
-    expect(response.transaction.service).toEqual('MTN');
-    expect(response.transaction.bParty).toEqual('237670000000');
-    expect(response.transaction.country).toEqual('CM');
-    expect(response.transaction.currency).toEqual('XAF');
-    expect(response.transaction.reference).toEqual('1');
-    expect(response.transaction.getData()).not.toBeNull()
-  });
-  it('Should make payment test with success without fees', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.makeCollect({
-      amount: 100,
-      service: 'MTN',
-      payer: '670000000',
-      nonce: RandomGenerator.nonce(),
-      trxID: '1',
-      fees: false
-    });
-    expect(response.success).toBeTruthy();
-    expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(100);
-    expect(response.transaction.fees).toEqual(3);
-    expect(response.transaction.service).toEqual('MTN');
-    expect(response.transaction.bParty).toEqual('237670000000');
-    expect(response.transaction.country).toEqual('CM');
-    expect(response.transaction.currency).toEqual('XAF');
-    expect(response.transaction.reference).toEqual('1');
-  });
-  it('Should make payment test with success with customer and product data', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const customer = {
-      phone: '+237677550439',
-      email: 'fisher.bank@gmail.com',
-      first_name: 'Fisher',
-      last_name: 'BANK'
-    }
-    const location = {town: 'Douala', country: 'Cameroun'}
-    const response = await payment.makeCollect({
-      amount: 100,
-      service: 'MTN',
-      payer: '670000000',
-      nonce: RandomGenerator.nonce(),
-      trxID: '1',
-      customer,
-      products: [{name: 'Sac a Dos', category: 'Sac'}],
-      location
-    });
-    expect(response.success).toBeTruthy();
-    expect(response.status).toEqual('SUCCESS');
-    expect(response.transaction.amount).toEqual(98);
-    expect(response.transaction.fees).toEqual(2);
-    expect(response.transaction.service).toEqual('MTN');
-    expect(response.transaction.bParty).toEqual('237670000000');
-    expect(response.transaction.country).toEqual('CM');
-    expect(response.transaction.currency).toEqual('XAF');
-    expect(response.transaction.customer!.phone).toEqual('+237677550439')
-    expect(response.transaction.customer!.email).toEqual('fisher.bank@gmail.com')
-    expect(response.transaction.customer!.firstName).toEqual('Fisher')
-    expect(response.transaction.customer!.lastName).toEqual('BANK')
-    Object.keys(location).forEach((key: string) => {
-      // @ts-ignore
-      expect(response.transaction.location[key]).toEqual(location[key]);
-    })
-    expect(response.transaction.products?.length).toEqual(1);
-    // @ts-ignore
-    expect(response.transaction.products[0].name).toEqual('Sac a Dos');
-    // @ts-ignore
-    expect(response.transaction.products[0].category).toEqual('Sac');
-  });
-  it('Should make payment test with pending', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.makeCollect({amount: 100, service: 'MTN', payer: '670000000', nonce: RandomGenerator.nonce(), trxID: '1', mode: 'asynchronous'});
-    expect(response.isOperationSuccess()).toBeTruthy();
-    expect(response.isTransactionSuccess()).toBeFalsy();
-  });
-});
 
-describe("Status Operation", () => {
-  beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
+    expect(response.isOperationSuccess()).toBe(true);
+    expect(response.isTransactionSuccess()).toBe(true);
+    expect(response.transaction.customer?.firstName).toBe('Jane');
+    expect(response.transaction.products?.[0].name).toBe('Bag');
+    expect(fetchMock).toHaveBeenCalledWith('https://example.com/api/v1.1/payment/collect/', expect.any(Object));
 
-  it('Should get status with not service found',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
-      await payment.getStatus();
-    } catch (e: any) {
-      expect(e.name).toEqual('ServiceNotFoundError');
-    }
+    const init = fetchMock.mock.calls[0][1];
+    expect(init.method).toBe('POST');
+    expect(init.headers['X-MeSomb-Application']).toBe(applicationKey);
+    expect(init.headers['X-MeSomb-TrxID']).toBe('external-1');
+    const body = JSON.parse(init.body as string);
+    expect(body.trxID).toBeUndefined();
+    expect(body.products).toHaveLength(1);
+    expect(body.note).toBe('hello');
   });
-  it('Should get status with not permission denied',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
-      await payment.getStatus();
-    } catch (e: any) {
-      expect(e.name).toEqual('PermissionDeniedError');
-    }
-  });
-  it('Should get status success',  async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.getStatus();
-    expect(response.name).toEqual('Meudocta Shop');
-  });
-});
 
-describe("Get Transactions Operation", () => {
-  beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
+  it('builds deposit and airtime request payloads', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(200, { success: true, message: 'ok', redirect: '', status: 'SUCCESS', reference: 'ref', transaction: baseTransaction }))
+      .mockResolvedValueOnce(mockResponse(200, { success: true, message: 'ok', redirect: '', status: 'SUCCESS', reference: 'ref', transaction: baseTransaction }));
+    global.fetch = fetchMock as any;
 
-  it('Should get transactions with not service found',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
-      await payment.getTransactions(['c6c40b76-8119-4e93-81bf-bfb55417b392']);
-    } catch (e: any) {
-      expect(e.name).toEqual('ServiceNotFoundError');
-    }
-  });
-  it('Should get transactions with not permission denied',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
-      await payment.getTransactions(['c6c40b76-8119-4e93-81bf-bfb55417b392']);
-    } catch (e: any) {
-      expect(e.name).toEqual('PermissionDeniedError');
-    }
-  });
-  it('Should get transactions success',  async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.getTransactions(['a483a9e8-51d7-44c9-875b-1305b1801274']);
-    expect(response.length).toEqual(1);
-    expect(response[0].pk).toEqual('a483a9e8-51d7-44c9-875b-1305b1801274');
-  });
-  it('Should get transactions success',  async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.getTransactions(['1'], 'EXTERNAL');
-    expect(response.length).toEqual(1);
-    expect(response[0].pk).toEqual('a483a9e8-51d7-44c9-875b-1305b1801274');
-  });
-});
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey });
+    await payment.makeDeposit({ amount: 100, service: 'MTN', receiver: '670000000', nonce: 'n1', trxID: 12 });
+    await payment.purchaseAirtime({ amount: 100, service: 'MTN', receiver: '670000000', merchant: 'MTN', nonce: 'n2' });
 
-describe("Check Transactions Operation", () => {
-  beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
-
-  it('Should check transactions with not service found',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey: applicationKey + "f", accessKey, secretKey});
-      await payment.checkTransactions(['c6c40b76-8119-4e93-81bf-bfb55417b392']);
-    } catch (e: any) {
-      expect(e.name).toEqual('ServiceNotFoundError');
-    }
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/api/v1.1/payment/deposit/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://example.com/api/v1.1/payment/airtime/', expect.any(Object));
   });
-  it('Should check transactions with not permission denied',  async () => {
-    expect.assertions(1);
-    try {
-      const payment = new PaymentOperation({applicationKey, accessKey: accessKey + 'f', secretKey});
-      await payment.checkTransactions(['c6c40b76-8119-4e93-81bf-bfb55417b392']);
-    } catch (e: any) {
-      expect(e.name).toEqual('PermissionDeniedError');
-    }
-  });
-  it('Should check transactions success',  async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.checkTransactions(['9886f099-dee2-4eaa-9039-e92b2ee33353']);
-    expect(response.length).toEqual(1);
-    expect(response[0].pk).toEqual('9886f099-dee2-4eaa-9039-e92b2ee33353');
-  });
-});
 
-describe("Refund Transactions Operation", () => {
-  beforeEach(() => {
-    MeSomb.HOST = 'http://127.0.0.1:8000';
-  })
+  it('handles refund, status, pricing and yango refill endpoints', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(200, { success: true, message: 'ok', redirect: '', status: 'SUCCESS', reference: 'ref', transaction: baseTransaction }))
+      .mockResolvedValueOnce(mockResponse(200, {
+        key: 'app-key',
+        logo: '',
+        balances: [{ country: 'CM', service: 'MTN', value: 1000 }],
+        countries: ['CM'],
+        description: 'desc',
+        name: 'My app',
+        security: {},
+        url: 'https://app.example.com',
+      }))
+      .mockResolvedValueOnce(mockResponse(200, { key: 'app-key', name: 'My App' }))
+      .mockResolvedValueOnce(mockResponse(200, { success: true, message: 'ok', redirect: '', status: 'SUCCESS', reference: 'ref', transaction: baseTransaction }));
+    global.fetch = fetchMock as any;
 
-  it('Should refund transaction', async () => {
-    const payment = new PaymentOperation({applicationKey, accessKey, secretKey});
-    const response = await payment.refundTransaction('a483a9e8-51d7-44c9-875b-1305b1801274', {});
-    expect(response.transaction.amount).toBeGreaterThan(0);
-  })
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey });
+    const refund = await payment.refundTransaction('trx-1', { amount: 50 });
+    const status = await payment.getStatus();
+    const pricing = await payment.getPricing();
+    const yango = await payment.yangoRefill({ amount: 100, service: 'MTN', payer: '670000000', driver_id: 'driver-1', mode: 'asynchronous' } as any);
+
+    expect(refund.transaction.pk).toBe('trx-1');
+    expect(status.getBalance('CM', 'MTN')).toBe(1000);
+    expect(pricing.name).toBe('My App');
+    expect(yango.status).toBe('SUCCESS');
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/api/v1.1/payment/refund/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://example.com/api/v1.1/payment/status/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(3, 'https://example.com/api/v1.1/payment/pricing/', expect.any(Object));
+    expect(fetchMock).toHaveBeenNthCalledWith(4, 'https://example.com/api/v1.1/payment/yango/refill/', expect.any(Object));
+    expect(fetchMock.mock.calls[3][1].headers['X-MeSomb-OperationMode']).toBe('asynchronous');
+  });
+
+  it('maps getTransactions and checkTransactions results to Transaction models', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(mockResponse(200, [baseTransaction]))
+      .mockResolvedValueOnce(mockResponse(200, [baseTransaction]));
+    global.fetch = fetchMock as any;
+
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey });
+    const transactions = await payment.getTransactions(['trx-1'], 'EXTERNAL');
+    const checks = await payment.checkTransactions(['trx-1']);
+
+    expect(transactions[0].pk).toBe('trx-1');
+    expect(checks[0].finTrxId).toBe('fin-1');
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://example.com/api/v1.1/payment/transactions/?ids=trx-1&source=EXTERNAL',
+      expect.any(Object),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://example.com/api/v1.1/payment/transactions/check/?ids=trx-1&source=MESOMB',
+      expect.any(Object),
+    );
+  });
+
+  it('maps HTTP client errors to typed exceptions', async () => {
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey });
+
+    global.fetch = jest.fn(async () => mockResponse(404, 'missing')) as any;
+    await expect(payment.getStatus()).rejects.toHaveProperty('name', 'ServiceNotFoundError');
+
+    global.fetch = jest.fn(async () => mockResponse(401, 'denied')) as any;
+    await expect(payment.getStatus()).rejects.toHaveProperty('name', 'PermissionDeniedError');
+
+    global.fetch = jest.fn(async () => mockResponse(400, { detail: 'bad request', code: 'invalid' })) as any;
+    await expect(payment.getStatus()).rejects.toHaveProperty('name', 'InvalidClientRequestError');
+
+    global.fetch = jest.fn(async () => mockResponse(500, { detail: 'boom', code: 'ERR' })) as any;
+    await expect(payment.getStatus()).rejects.toHaveProperty('name', 'ServerError');
+  });
+
+  it('maps AbortError to Request timeout and rethrows unknown fetch errors', async () => {
+    jest.useFakeTimers();
+    global.fetch = jest.fn((_, init?: RequestInit) => {
+      return new Promise((_, reject) => {
+        init?.signal?.addEventListener('abort', () => {
+          const abortError = new Error('aborted');
+          abortError.name = 'AbortError';
+          reject(abortError);
+        });
+      });
+    }) as any;
+
+    const payment = new PaymentOperation({ applicationKey, accessKey, secretKey, timeout: 10 });
+    const pending = payment.getStatus();
+    jest.advanceTimersByTime(20);
+    await expect(pending).rejects.toThrow('Request timeout');
+    jest.useRealTimers();
+
+    const unknownError = new Error('network down');
+    global.fetch = jest.fn(async () => Promise.reject(unknownError)) as any;
+    await expect(payment.getStatus()).rejects.toThrow('network down');
+  });
 });

@@ -1,6 +1,7 @@
 import { Application, Transaction, TransactionResponse } from '../models';
+import PaymentAppResponse from '../models/PaymentAppResponse';
 import 'isomorphic-fetch';
-import { AirtimePurchaseRequest, MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest } from '../types';
+import { AirtimePurchaseRequest, MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest, YangoRefillRequest } from '../types';
 import { AOperation } from './AOperation';
 import RandomGenerator from '../util/RandomGenerator';
 
@@ -17,13 +18,15 @@ export default class PaymentOperation extends AOperation {
     accessKey,
     secretKey,
     language = 'en',
+    timeout,
   }: {
     applicationKey: string;
     accessKey: string;
     secretKey: string;
     language?: string;
+    timeout?: number;
   }) {
-    super({ target: applicationKey, accessKey, secretKey, language });
+    super({ target: applicationKey, accessKey, secretKey, language, timeout });
   }
 
   /**
@@ -247,6 +250,26 @@ export default class PaymentOperation extends AOperation {
   }
 
   /**
+   * Retrieve the current payment pricing information for the application.
+   */
+  public async getPricing(): Promise<PaymentAppResponse> {
+    const endpoint = 'payment/pricing/';
+    return new PaymentAppResponse(await this.executeRequest('GET', endpoint, new Date(), ''));
+  }
+
+  /**
+   * Refill a Yango driver account.
+   */
+  public async yangoRefill(params: YangoRefillRequest): Promise<TransactionResponse> {
+    const { nonce, mode = 'synchronous', ...body } = params;
+    const endpoint = 'payment/yango/refill/';
+
+    return new TransactionResponse(
+      await this.executeRequest('POST', endpoint, new Date(), nonce ?? RandomGenerator.nonce(), body, mode),
+    );
+  }
+
+  /**
    * Fetch transactions base on MeSomb IDs or external IDs
    *
    *
@@ -265,10 +288,9 @@ export default class PaymentOperation extends AOperation {
   /**
    * Check transactions base on MeSomb IDs or external IDs
    *
-   * @param ids: ids of the transactions
-   * @param source: origin of the ID of the transactions (MESOMB for MeSomb and EXTERNAL for your system)
-   *
    * @return Transaction[]
+   * @param ids
+   * @param source
    */
   public async checkTransactions(ids: string[], source = 'MESOMB'): Promise<Record<string, any>[]> {
     const endpoint = `payment/transactions/check/?ids=${ids.join(',')}&source=${source}`;

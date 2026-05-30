@@ -13,13 +13,15 @@ export class FundraisingOperation extends AOperation {
     accessKey,
     secretKey,
     language = 'en',
+    timeout,
   }: {
     fundKey: string;
     accessKey: string;
     secretKey: string;
     language?: string;
+    timeout?: number;
   }) {
-    super({ target: fundKey, accessKey, secretKey, language });
+    super({ target: fundKey, accessKey, secretKey, language, timeout });
   }
 
   /**
