@@ -1,6 +1,6 @@
-import { AOperation } from './AOperation';
-import RandomGenerator from '../util/RandomGenerator';
-import CheckoutSession from '../models/CheckoutSession';
+import { AOperation } from './AOperation.js';
+import RandomGenerator from '../util/RandomGenerator.js';
+import CheckoutSession from '../models/CheckoutSession.js';
 
 export class CheckoutSessionOperation extends AOperation {
   protected service = 'payment';

@@ -1,5 +1,5 @@
-import Wallet from './Wallet';
-import APaginated from './APaginated';
+import Wallet from './Wallet.js';
+import APaginated from './APaginated.js';
 
 /**
  * @class PaginatedWallets

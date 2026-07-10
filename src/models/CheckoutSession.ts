@@ -1,5 +1,5 @@
-import MerchantCustomer from './MerchantCustomer';
-import Location from './Location';
+import MerchantCustomer from './MerchantCustomer.js';
+import Location from './Location.js';
 
 export default class CheckoutSession {
   private readonly data: Record<string, any>;

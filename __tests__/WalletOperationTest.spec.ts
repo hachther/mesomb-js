@@ -1,5 +1,5 @@
-import MeSomb from '../src/MeSomb';
-import { WalletOperation } from '../src';
+import MeSomb from '../src/MeSomb.js';
+import { WalletOperation } from '../src/operations/WalletOperation.js';
 
 const providerKey = 'provider-key';
 const accessKey = 'access-key';

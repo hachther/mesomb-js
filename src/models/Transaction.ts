@@ -1,7 +1,7 @@
-import Customer from './Customer';
-import Product from './Product';
-import { ATransaction } from './ATransaction';
-import { ProductData, TransactionData } from '../types';
+import Customer from './Customer.js';
+import Product from './Product.js';
+import { ATransaction } from './ATransaction.js';
+import { ProductData, TransactionData } from '../types.js';
 
 /**
  * Transaction model

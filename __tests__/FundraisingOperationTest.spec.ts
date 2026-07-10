@@ -1,5 +1,5 @@
-import MeSomb from '../src/MeSomb';
-import { FundraisingOperation } from '../src/operations/FundraisingOperation';
+import MeSomb from '../src/MeSomb.js';
+import { FundraisingOperation } from '../src/operations/FundraisingOperation.js';
 
 const fundKey = 'fund-key';
 const accessKey = 'access-key';

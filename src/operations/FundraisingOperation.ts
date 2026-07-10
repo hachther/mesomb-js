@@ -1,8 +1,8 @@
-import { AOperation } from './AOperation';
-import { MoneyContributeRequest } from '../types';
-import ContributionResponse from '../models/ContributionResponse';
-import Contribution from '../models/Contribution';
-import RandomGenerator from '../util/RandomGenerator';
+import { AOperation } from './AOperation.js';
+import { MoneyContributeRequest } from '../types.js';
+import ContributionResponse from '../models/ContributionResponse.js';
+import Contribution from '../models/Contribution.js';
+import RandomGenerator from '../util/RandomGenerator.js';
 
 
 export class FundraisingOperation extends AOperation {

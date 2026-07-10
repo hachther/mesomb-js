@@ -1,4 +1,4 @@
-import { Signature } from '../src';
+import Signature from '../src/Signature.js';
 
 describe("MeSomb Signature", () => {
   it('Should compute signature', () => {

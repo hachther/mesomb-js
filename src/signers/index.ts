@@ -1,4 +1,4 @@
-export { CryptoJsSigner } from './CryptoJsSigner';
-export { WebCryptoSigner } from './WebCryptoSigner';
-export type { RequestSigner, SignRequestParams } from './types';
+export { CryptoJsSigner } from './CryptoJsSigner.js';
+export { WebCryptoSigner } from './WebCryptoSigner.js';
+export type { RequestSigner, SignRequestParams } from './types.js';
 

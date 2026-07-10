@@ -1,5 +1,5 @@
-import Contribution from './Contribution';
-import { CustomerData, LocationData, TransactionData } from '../types';
+import Contribution from './Contribution.js';
+import { CustomerData, LocationData, TransactionData } from '../types.js';
 
 /**
  * Class representing a transaction response

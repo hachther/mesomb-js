@@ -1,9 +1,15 @@
-import { Application, Transaction, TransactionResponse } from '../models/index';
-import PaymentAppResponse from '../models/PaymentAppResponse';
+import { Application, Transaction, TransactionResponse } from '../models/index.js';
+import PaymentAppResponse from '../models/PaymentAppResponse.js';
 import 'isomorphic-fetch';
-import { AirtimePurchaseRequest, MoneyCollectRequest, MoneyDepositRequest, PaymentRefundRequest, YangoRefillRequest } from '../types';
-import { AOperation } from './AOperation';
-import RandomGenerator from '../util/RandomGenerator';
+import {
+  AirtimePurchaseRequest,
+  MoneyCollectRequest,
+  MoneyDepositRequest,
+  PaymentRefundRequest,
+  YangoRefillRequest,
+} from '../types.js';
+import { AOperation } from './AOperation.js';
+import RandomGenerator from '../util/RandomGenerator.js';
 
 /**
  * Containing all operations provided by MeSomb Payment Service.

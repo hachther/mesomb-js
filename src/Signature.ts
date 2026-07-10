@@ -1,8 +1,8 @@
-import MeSomb from './MeSomb';
-import { CryptoJsSigner } from './signers/CryptoJsSigner';
-import { RequestSigner } from './signers/types';
+import MeSomb from './MeSomb.js';
+import { CryptoJsSigner } from './signers/index.js';
+import { RequestSigner } from './signers/types.js';
 
-export class Signature {
+export default class Signature {
   private static signer: RequestSigner = new CryptoJsSigner();
 
   public static setSigner(signer: RequestSigner): void {

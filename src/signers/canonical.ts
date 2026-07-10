@@ -1,4 +1,4 @@
-import { CanonicalRequestData, SignRequestParams } from './types';
+import { CanonicalRequestData, SignRequestParams } from './types.js';
 
 function parseUrl(url: string): { protocol: string; host: string; pathname: string; query: string } {
   const parsed = new URL(url);

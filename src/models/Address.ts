@@ -1,4 +1,4 @@
-import { AddressData } from '../types';
+import { AddressData } from '../types.js';
 
 export default class Address {
   private readonly data: Record<string, any>;

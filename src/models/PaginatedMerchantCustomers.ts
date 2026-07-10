@@ -1,5 +1,5 @@
-import APaginated from './APaginated';
-import MerchantCustomer from './MerchantCustomer';
+import APaginated from './APaginated.js';
+import MerchantCustomer from './MerchantCustomer.js';
 
 export default class PaginatedMerchantCustomers extends APaginated<MerchantCustomer> {}
 

@@ -1,5 +1,5 @@
-import { buildCanonicalRequest, buildCanonicalRequestData } from './canonical';
-import { RequestSigner, SignRequestParams } from './types';
+import { buildCanonicalRequest, buildCanonicalRequestData } from './canonical.js';
+import { RequestSigner, SignRequestParams } from './types.js';
 
 const encoder = new TextEncoder();
 

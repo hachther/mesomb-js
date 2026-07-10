@@ -1,5 +1,5 @@
-import { CustomerData } from '../types';
-import Address from './Address';
+import { CustomerData } from '../types.js';
+import Address from './Address.js';
 
 /**
  * Customer model

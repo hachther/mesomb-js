@@ -1,6 +1,6 @@
-import Customer from './Customer';
-import { ATransaction } from './ATransaction';
-import { CustomerData, TransactionData } from '../types';
+import Customer from './Customer.js';
+import { ATransaction } from './ATransaction.js';
+import { CustomerData, TransactionData } from '../types.js';
 
 /**
  * Class representing a contribution

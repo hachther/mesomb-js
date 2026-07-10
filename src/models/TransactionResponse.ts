@@ -1,5 +1,5 @@
-import Transaction from './Transaction';
-import { TransactionData } from '../types';
+import Transaction from './Transaction.js';
+import { TransactionData } from '../types.js';
 
 /**
  * Represents the response of a transactional operation.

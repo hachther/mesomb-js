@@ -1,5 +1,5 @@
-import MeSomb from '../src/MeSomb';
-import PaymentOperation from '../src/operations/PaymentOperation';
+import MeSomb from '../src/MeSomb.js';
+import PaymentOperation from '../src/operations/PaymentOperation.js';
 
 const applicationKey = 'app-key';
 const accessKey = 'access-key';

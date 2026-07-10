@@ -1,10 +1,10 @@
-import { AOperation } from './AOperation';
-import { WalletCreationRequest } from '../types';
-import Wallet from '../models/Wallet';
-import RandomGenerator from '../util/RandomGenerator';
-import WalletTransaction from '../models/WalletTransaction';
-import PaginatedWallets from '../models/PaginatedWallets';
-import PaginatedWalletTransactions from '../models/PaginatedWalletTransactions';
+import { AOperation } from './AOperation.js';
+import { WalletCreationRequest } from '../types.js';
+import Wallet from '../models/Wallet.js';
+import RandomGenerator from '../util/RandomGenerator.js';
+import WalletTransaction from '../models/WalletTransaction.js';
+import PaginatedWallets from '../models/PaginatedWallets.js';
+import PaginatedWalletTransactions from '../models/PaginatedWalletTransactions.js';
 
 export class WalletOperation extends AOperation {
   service = 'wallet';

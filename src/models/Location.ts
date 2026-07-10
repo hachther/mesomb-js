@@ -1,4 +1,4 @@
-import { LocationData } from '../types';
+import { LocationData } from '../types.js';
 
 /**
  * Location model

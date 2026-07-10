@@ -1,4 +1,4 @@
-import Address from './Address';
+import Address from './Address.js';
 
 export default class MerchantCustomer {
   private readonly data: Record<string, any>;

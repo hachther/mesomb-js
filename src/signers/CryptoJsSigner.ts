@@ -1,6 +1,6 @@
-import * as CryptoJS from 'crypto-js';
-import { buildCanonicalRequest, buildCanonicalRequestData } from './canonical';
-import { RequestSigner, SignRequestParams } from './types';
+import CryptoJS from 'crypto-js';
+import { buildCanonicalRequest, buildCanonicalRequestData } from './canonical.js';
+import { RequestSigner, SignRequestParams } from './types.js';
 
 export class CryptoJsSigner implements RequestSigner {
   public signRequest(params: SignRequestParams): string {

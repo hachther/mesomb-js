@@ -1,5 +1,5 @@
-import Location from './Location';
-import { TransactionData } from '../types';
+import Location from './Location.js';
+import { TransactionData } from '../types.js';
 
 /**
  * Abstract class for transaction

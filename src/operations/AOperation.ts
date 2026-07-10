@@ -1,7 +1,7 @@
-import MeSomb from '../MeSomb';
-import { Signature } from '../Signature';
-import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions/index';
-import Settings from '../MeSomb';
+import MeSomb from '../MeSomb.js';
+import Signature from '../Signature.js';
+import { InvalidClientRequestError, PermissionDeniedError, ServerError, ServiceNotFoundError } from '../exceptions/index.js';
+import Settings from '../MeSomb.js';
 
 export abstract class AOperation {
   /**

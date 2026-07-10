@@ -1,7 +1,7 @@
-import { AOperation } from './AOperation';
-import RandomGenerator from '../util/RandomGenerator';
-import MerchantCustomer from '../models/MerchantCustomer';
-import PaginatedMerchantCustomers from '../models/PaginatedMerchantCustomers';
+import { AOperation } from './AOperation.js';
+import RandomGenerator from '../util/RandomGenerator.js';
+import MerchantCustomer from '../models/MerchantCustomer.js';
+import PaginatedMerchantCustomers from '../models/PaginatedMerchantCustomers.js';
 
 export class CustomerOperation extends AOperation {
   protected service = 'payment';
